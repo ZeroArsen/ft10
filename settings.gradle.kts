@@ -1,4 +1,8 @@
 pluginManagement {
+    plugins {
+        // Modrinth publishing (same plugin as rGoldenHeads); applied per version in build.gradle.kts.
+        id("com.modrinth.minotaur") version "2.10.0"
+    }
     repositories {
         mavenCentral()
         gradlePluginPortal()

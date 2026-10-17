@@ -15,7 +15,8 @@
   real test needs the 1.21.11 port.
 - [ ] **5. Multi-version** — 26.3 and 26.1.2 first, then 1.21.11 down to 1.21.1. Versions per node are
   already looked up (see below).
-- [ ] **6. Release** — GitHub repo, CI publish, Modrinth project page, v1.0.0.
+- [ ] **6. Release** — GitHub repo ✅ (public, CI green), Modrinth publishing set up (Minotaur + release.yml);
+  waiting for the owner to create the Modrinth project `ft10` and add the `MODRINTH_TOKEN` secret, then tag v0.1.0.
 
 ## Next task
 Port to 1.21.11 (the owner's RevoltFFA server version) so the integration can be tested for real, then the
