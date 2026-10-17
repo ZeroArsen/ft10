@@ -65,5 +65,8 @@ veya `/ft config` ile açılır. Mod sunucuya hiçbir şey göndermez, sadece cl
 JDK 25 is downloaded automatically through Gradle toolchains. The project uses
 [Stonecutter](https://stonecutter.kikugie.dev/) for multi-version builds; see `context/ARCHITECTURE.md`.
 
+## Credits
+Made by **0Arsen** ([Modrinth](https://modrinth.com/user/0Arsen) · [GitHub](https://github.com/ZeroArsen)).
+
 ## License
 [GPL-3.0-only](LICENSE).

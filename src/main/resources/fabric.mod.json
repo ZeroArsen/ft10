@@ -5,7 +5,12 @@
   "name": "${name}",
   "description": "Client-side PvP score counter for FFA and duels. Remembers who you are fighting and shows your first-to score above the action bar.",
   "authors": [
-    "0Arsen"
+    {
+      "name": "0Arsen",
+      "contact": {
+        "homepage": "https://modrinth.com/user/0Arsen"
+      }
+    }
   ],
   "contact": {
     "homepage": "https://modrinth.com/mod/ft10",

@@ -53,14 +53,19 @@ loom {
         jvmArguments.add("-Dmixin.debug.export=true")
     }
 
+    // `-Pft10.join=localhost` makes both dev clients join that server straight away (see context/TESTING.md).
+    val joinServer = providers.gradleProperty("ft10.join").orNull
+
     runs {
         named("client") {
             programArgs("--username", "Ft10Dev")
+            if (joinServer != null) programArgs("--quickPlayMultiplayer", joinServer)
         }
         // A second client so two players can fight each other on the local dev server.
         register("opponent") {
             client()
             programArgs("--username", "Ft10Rival")
+            if (joinServer != null) programArgs("--quickPlayMultiplayer", joinServer)
         }
     }
 }

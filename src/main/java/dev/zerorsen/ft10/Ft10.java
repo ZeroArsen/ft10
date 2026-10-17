@@ -21,6 +21,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundEntityEventPacket;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 
@@ -125,6 +126,16 @@ public final class Ft10 {
         Entity cause = causeId >= 0 ? level.getEntity(causeId) : null;
         if (victim instanceof Player v && cause instanceof Player a) {
             session.onHit(Players.of(a), Players.of(v), System.currentTimeMillis());
+        }
+    }
+
+    /** An entity-event "death" packet arrived; only other players' deaths matter here. */
+    public void onEntityDeath(ClientboundEntityEventPacket packet) {
+        Minecraft minecraft = Minecraft.getInstance();
+        if (!tracking() || minecraft.level == null) return;
+        if (packet.getEntity(minecraft.level) instanceof Player player && player != minecraft.player) {
+            deadPlayers.add(player.getUUID());
+            session.onDeathSeen(Players.of(player), System.currentTimeMillis());
         }
     }
 
