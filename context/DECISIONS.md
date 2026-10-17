@@ -80,3 +80,19 @@ killer, the hit history decides. Both forms share these rules.
 **D19 — `/ft debug` is for finding missed formats.** Not saved (off after restart). It explains every signal and
 remembers the last 10 unrecognized messages that mention us or a recent opponent, with a local Copy button.
 `-Pft10.debug` starts dev clients with it on.
+
+**D20 — Duel servers: winner messages and spectator switches.** Studied the owner's RevoltPvP (Paper 1.21.11): it
+cancels the fatal blow and switches the loser to spectator, so no death packet, no 0 health and no death message
+reach any client. What clients do get: `<winner> won the round <a> - <b>` (fighters + spectators, every round incl.
+the last), `Round Won` / `You Died` titles (not on the last round), and the game-mode change in the tab list. FT10
+reads all three, nothing RevoltPvP-specific: a `{winner}` placeholder/group (winner = us → our current opponent
+died to us; winner = someone we're fighting → we died to them; anyone else is ignored), title presets with an
+implicit side (`OPPONENT` sentinel), and a switch to spectator by us or a current opponent counts as a seen death
+(killer from the hits). VICTORY/DEFEAT titles are not used: a quit also shows them. The sidebar "Score: a - b" is
+not used either: in Party Split it is Red - Blue, not ours first. Game modes are only forgotten on disconnect (the
+tab list can arrive before JOIN), and "is this us" also checks the client player's UUID (the session's own ref may
+have none).
+
+**D21 — HUD shows the opponent's name without "vs".** The unused label color option went with it (Gson ignores the
+old `colorLabel` key). Settings got "Reset scores on this server" and "Reset all scores" buttons, each behind a
+vanilla ConfirmScreen.

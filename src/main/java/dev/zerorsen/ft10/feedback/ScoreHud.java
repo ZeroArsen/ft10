@@ -109,12 +109,12 @@ public final class ScoreHud {
         return screenHeight - BOTTOM_FROM_SCREEN_BOTTOM;
     }
 
-    /** "vs Alex · FT10 · 1 - 0" — whichever parts are enabled; null if none. */
+    /** "Alex · FT10 · 1 - 0" — whichever parts are enabled; null if none. */
     private static Component label(View view, Ft10Config c) {
         MutableComponent label = Component.empty();
         boolean any = false;
         if (c.hudShowName) {
-            label.append(Component.translatable("ft10.hud.vs", Texts.literal(view.name(), Texts.VALUE)).withColor(c.colorLabel));
+            label.append(Texts.literal(view.name(), Texts.VALUE));
             any = true;
         }
         if (c.hudShowGoal && c.goal > 0) {

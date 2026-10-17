@@ -71,6 +71,19 @@ Same on both versions unless noted.
 
 Run `-Pft10.debug` with `-Pft10.join=localhost` to get the debug lines in `[CHAT]` and `[debug]` log lines.
 
+## Automated run — 2026-10-17/18, 0.2.1 duel signals (26.2 and 1.21.11, RCON, `-Pft10.debug`)
+RevoltPvP's round end replayed by hand: hit, `gamemode spectator <loser>`, `tellraw @a "<winner> won the round 1 - 0"`,
+`title … "Round Won"` / `"You Died"`.
+
+| Scenario | Result |
+|---|---|
+| Full round end (spectator + chat + both titles) | ✅ one point each side (`won-the-round`; the titles add nothing) |
+| Spectator switch only, no message (both directions) | ✅ one point each side |
+| Our own switch to spectator after rejoining | ❌ → ✅ missed: the session's self ref had no UUID; now also compared with the client player's UUID |
+| `"Herobrine won the round"` / a stale opponent's win (>10 s after the fight) | ✅ no point |
+| HUD (screenshot) | ✅ "Ft10Rival" over the score, no "vs" |
+| Reset all scores | ✅ `ScoreStorageTest` (all servers emptied, file saved); the settings button itself is still to click by hand |
+
 ## Still to check by hand
 - [ ] Kill with a bow; void/fall after a hit ("doomed to fall by").
 - [ ] Third player hits Ft10Dev mid-fight → screen stays; new opponent → 0 - 0; back → old score.
@@ -84,3 +97,5 @@ Run `-Pft10.debug` with `-Pft10.join=localhost` to get the debug lines in `[CHAT
 - [ ] F1 hides the HUD. Turkish client language → Turkish texts.
 - [ ] Public FFA servers with plugin kill messages (owner): run `/ft debug`, report "Not recognized" lines.
 - [ ] Real fight with sword swings: sidebar kill counter on a fake-death server; `countCombatLogs` on.
+- [ ] RevoltPvP for real (owner): duel rounds and the last round count once each; spectating a duel adds nothing.
+- [ ] Settings → General → "Reset scores on this server" / "Reset all scores": confirm screen, Cancel keeps scores.

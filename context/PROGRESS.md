@@ -15,15 +15,17 @@
 - [x] **4d. Kill detection round 2** (D17–D19): wrapped vanilla messages, second-person and broad presets,
   templates, action bar/title parsing, sidebar kill/death counters, optional combat logs, `/ft debug`. 57 unit
   tests per version; RCON run on 26.2 and 1.21.11 (`TESTING.md`).
+- [x] **4e. Duel servers** (D20, D21): `{winner}` messages, round titles, spectator switch as a death; HUD
+  without "vs"; reset-all buttons. Built from a study of the owner's RevoltPvP; 64 unit tests per version.
 - [ ] **5. Multi-version** — **1.21.11 done** (2026-10-17: both jars build, 36 tests pass on each, RCON
   two-player run in `TESTING.md`; merged into main in 0.2.0). Left: 26.3 and 26.1.2, then 1.21.10 down to
   1.21.1. Versions per node are already looked up (see below).
 - [x] **6. Release** — GitHub repo (public, CI green); Modrinth project `ft10` (in review). v0.1.0 (26.2)
-  released 2026-10-17; v0.2.0 (26.2 + 1.21.11) adds the 1.21.11 jar and the new detection.
+  released 2026-10-17; v0.2.0 (26.2 + 1.21.11) adds the 1.21.11 jar and the new detection; v0.2.1 the duel signals.
 
 ## Next task
-The owner tests on public servers with `/ft debug` and reports "Not recognized" messages; add the formats as
-presets. Next port: 26.1.2 (it settles whether each `>=26.1` guard really belongs at 26.1, see ARCHITECTURE.md) and
+The owner tests 0.2.1 on RevoltPvP and public servers with `/ft debug` and reports "Not recognized" messages;
+add the formats as presets. Next port: 26.1.2 (it settles whether each `>=26.1` guard really belongs at 26.1, see ARCHITECTURE.md) and
 26.3, then 1.21.10 down to 1.21.1 (the 1.21.9, 1.21.6 and 1.21.5 boundaries in ARCHITECTURE.md still need guards).
 
 ## Dependency versions per node (Modrinth, 2026-10-17)

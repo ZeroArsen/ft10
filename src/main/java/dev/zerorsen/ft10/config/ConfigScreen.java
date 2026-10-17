@@ -16,14 +16,18 @@ import dev.isxander.yacl3.api.controller.StringControllerBuilder;
 import dev.isxander.yacl3.api.controller.TickBoxControllerBuilder;
 import dev.zerorsen.ft10.Ft10;
 import dev.zerorsen.ft10.compat.ClientCompat;
+import dev.zerorsen.ft10.compat.HudCompat;
 import dev.zerorsen.ft10.core.DeathMessageParser;
 import dev.zerorsen.ft10.feedback.HudEditorScreen;
+import dev.zerorsen.ft10.feedback.Texts;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.OptionalInt;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
@@ -49,6 +53,8 @@ public final class ConfigScreen {
                 .option(bool("autoNewSet", d.autoNewSet, () -> c.autoNewSet, v -> c.autoNewSet = v))
                 .option(bool("saveScores", d.saveScores, () -> c.saveScores, v -> c.saveScores = v))
                 .option(bool("shortAlias", d.shortAlias, () -> c.shortAlias, v -> c.shortAlias = v))
+                .option(resetButton("resetServer", ConfigScreen::resetThisServer))
+                .option(resetButton("resetEverything", () -> OptionalInt.of(Ft10.get().resetAllScores())))
                 .build())
             .category(ConfigCategory.createBuilder()
                 .name(text("category.hud"))
@@ -88,7 +94,6 @@ public final class ConfigScreen {
                     .option(color("colorMe", d.colorMe, () -> c.colorMe, v -> c.colorMe = v))
                     .option(color("colorThem", d.colorThem, () -> c.colorThem, v -> c.colorThem = v))
                     .option(color("colorSeparator", d.colorSeparator, () -> c.colorSeparator, v -> c.colorSeparator = v))
-                    .option(color("colorLabel", d.colorLabel, () -> c.colorLabel, v -> c.colorLabel = v))
                     .build())
                 .build())
             .category(ConfigCategory.createBuilder()
@@ -150,6 +155,31 @@ public final class ConfigScreen {
             if (p != null && !p.isBlank() && DeathMessageParser.validate(p) == null) out.add(p);
         }
         return out;
+    }
+
+    /**
+     * A red button that asks first, then runs {@code reset} (empty = not connected) and says in chat how many
+     * scores went. Either way it comes back to the settings.
+     */
+    private static ButtonOption resetButton(String key, Supplier<OptionalInt> reset) {
+        return ButtonOption.createBuilder()
+            .name(text(key).copy().withColor(Texts.ERROR))
+            .description(describe(key))
+            .text(text(key + ".button"))
+            .action(settings -> ClientCompat.setScreen(Minecraft.getInstance(), new ConfirmScreen(yes -> {
+                if (yes) {
+                    OptionalInt count = reset.get();
+                    HudCompat.chat(Texts.line(count.isPresent()
+                        ? Texts.colored(Texts.SUCCESS, "ft10.reset.all.done", Texts.value(count.getAsInt()))
+                        : Texts.colored(Texts.ERROR, "ft10.error.not_connected")));
+                }
+                ClientCompat.setScreen(Minecraft.getInstance(), settings);
+            }, text(key + ".confirm"), text(key + ".confirm.message"))))
+            .build();
+    }
+
+    private static OptionalInt resetThisServer() {
+        return Ft10.get().session().map(s -> OptionalInt.of(s.book().resetAll())).orElse(OptionalInt.empty());
     }
 
     /** A collapsed list of sidebar labels ("Kills", "Deaths"); blank entries are dropped. */

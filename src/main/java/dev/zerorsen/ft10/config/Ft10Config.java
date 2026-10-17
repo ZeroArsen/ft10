@@ -13,7 +13,6 @@ public final class Ft10Config {
     public static final int DEFAULT_COLOR_ME = 0x04E525;
     public static final int DEFAULT_COLOR_THEM = 0xE50404;
     public static final int DEFAULT_COLOR_SEPARATOR = 0x555555;
-    public static final int DEFAULT_COLOR_LABEL = 0x919191;
 
     public boolean enabled = true;
 
@@ -30,7 +29,6 @@ public final class Ft10Config {
     public int colorMe = DEFAULT_COLOR_ME;
     public int colorThem = DEFAULT_COLOR_THEM;
     public int colorSeparator = DEFAULT_COLOR_SEPARATOR;
-    public int colorLabel = DEFAULT_COLOR_LABEL;
 
     // Feedback
     public boolean titleEnabled = true;

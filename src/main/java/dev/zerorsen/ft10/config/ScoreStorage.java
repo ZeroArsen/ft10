@@ -72,6 +72,17 @@ public final class ScoreStorage {
         }
     }
 
+    /**
+     * Deletes every score on every server and saves at once. The books stay (a running session keeps using its
+     * own), they are just empty. Returns how many scores were deleted.
+     */
+    public int resetEverything(boolean persist) {
+        int count = 0;
+        for (ScoreBook book : books.values()) count += book.resetAll();
+        flush(persist);
+        return count;
+    }
+
     /** Saves if a book changed at least {@link #SAVE_DELAY_MS} ago. Call every tick. */
     public void tick(long now, boolean persist) {
         boolean changed = books.values().stream().anyMatch(ScoreBook::isDirty);

@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.2.1 — 2026-10-18 (beta)
+Kills on duel servers that never really kill the loser.
+
+- Duel round messages that only name the winner ("Steve won the round 1 - 0") now count: a point for you when you
+  won, for your opponent when they did. Watching someone else's duel adds nothing.
+- "Round Won" and "You Died" titles count too.
+- A player switching to spectator mode right after a fight with you counts as a death, for servers that fake
+  deaths that way.
+- Custom patterns accept `{winner}` for such messages: `{winner} won the round *`.
+- The HUD shows just the opponent's name, without "vs".
+- Settings → General has "Reset scores on this server" and "Reset all scores" (with a confirmation).
+
 ## 0.2.0 — 2026-10-17 (beta)
 Now for Minecraft **1.21.11** as well as 26.2, with much better kill detection.
 

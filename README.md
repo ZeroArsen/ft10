@@ -50,7 +50,9 @@ the killer or the victim.
    sidebar going up by one is matched with the player you just fought. The labels are configurable.
 4. **Recent hits.** If a player dies without a usable message, whoever hit them last within the kill credit
    window (10 s by default) gets the kill.
-5. **Combat logs** (off by default): an opponent who leaves mid-fight counts as your kill.
+5. **Duel servers.** Round messages that only name the winner (`Steve won the round 1 - 0`), "Round Won" /
+   "You Died" titles, and a switch to spectator right after a fight are read as the end of your fight.
+6. **Combat logs** (off by default): an opponent who leaves mid-fight counts as your kill.
 
 The same death is never counted twice. If a point is ever wrong, click **[Undo]** in chat or run `/ft undo`.
 
