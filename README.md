@@ -49,8 +49,8 @@ The client is never told "X killed Y", so FT10 combines several signals:
 The same death is never counted twice. If a point is ever wrong, click **[Undo]** in chat or run `/ft undo`.
 
 ## Supported versions
-Fabric. Planned range is Minecraft **1.21 – 26.3** (one jar per version range); right now only **26.2** is
-built, the other versions are being ported. Requires
+Fabric. Planned range is Minecraft **1.21 – 26.3** (one jar per version range); right now **26.2** and
+**1.21.11** are built, the other versions are being ported. Requires
 [Fabric API](https://modrinth.com/mod/fabric-api) and [YACL](https://modrinth.com/mod/yacl);
 [Mod Menu](https://modrinth.com/mod/modmenu) is optional.
 
@@ -62,11 +62,12 @@ veya `/ft config` ile açılır. Mod sunucuya hiçbir şey göndermez, sadece cl
 
 ## Building
 ```
-./gradlew build            # builds the active version (see stonecutter.gradle.kts)
-./gradlew test             # unit tests
-./gradlew :26.2:runClient  # dev client; :26.2:runOpponent starts a second player, :26.2:runServer a server
+./gradlew build               # builds and tests every version: versions/<version>/build/libs/
+./gradlew test                # unit tests, every version
+./gradlew :26.2:runClient     # dev client; :26.2:runOpponent starts a second player, :26.2:runServer a server
+./gradlew :1.21.11:runClient  # the same for 1.21.11 (game folders under run/1.21.11/)
 ```
-JDK 25 is downloaded automatically through Gradle toolchains. The project uses
+JDK 25 (and JDK 21 for 1.21.x) is downloaded automatically through Gradle toolchains. The project uses
 [Stonecutter](https://stonecutter.kikugie.dev/) for multi-version builds; see `context/ARCHITECTURE.md`.
 
 ## Credits

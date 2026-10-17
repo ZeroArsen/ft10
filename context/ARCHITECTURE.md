@@ -45,6 +45,11 @@ ScoreHud reads Session.book().active() every frame.
   `name:<lower-case name>` when no UUID was known. Saved 2 s after the last change and on disconnect/exit.
 
 ## Version boundaries to handle in `compat/` (Phase 5)
+Built so far: **1.21.11** and **26.2**. Conditions are written `//? if >=26.1 { … //?} else { /*…*///?}`; the source
+in `src/` is always 26.2's side (`vcsVersion`). The 26.x rows below were checked against the 1.21.11 and 26.2
+jars only: whether each change landed in 26.1 or 26.2 is unverified until a 26.1.2 node exists. Don't put `//`
+comments inside a commented-out branch: Stonecutter strips `//` when it turns the branch on.
+
 | Since | Change | Where |
 |---|---|---|
 | 1.21.5 | Hover/ClickEvent became records (`HoverEvent.ShowEntity`, `ClickEvent.RunCommand`) | `TextCompat` |
@@ -54,4 +59,9 @@ ScoreHud reads Session.book().active() every frame.
 | 26.x | `PayloadTypeRegistry.playS2C()` → `clientboundPlay()`; fabric-key-mapping-api | `NetCompat`, `KeyCompat` |
 | 1.21.11 | `ResourceLocation` → `Identifier` (Stonecutter string replacement) | `stonecutter.gradle.kts` |
 | 26.1 | Unobfuscated; Java 25; Loom without remapping (handled by loom-back-compat) | build |
-| 26.x | `Gui.hud` holds HUD calls, `GuiGraphicsExtractor`, `EntityTypes.PLAYER`, `ClientCommands`, `Gui.setScreen` | `HudCompat`, `TextCompat`, `ClientCompat`, `FtCommand` imports |
+| 26.x | `Gui.hud` holds title/action bar/chat (`Gui` itself before); F1 is `Hud.isHidden()` (`options.hideGui` before); chat `addClientSystemMessage` (`addMessage` before) | `HudCompat` |
+| 26.x | `GuiGraphicsExtractor` (`GuiGraphics` before): `text`/`outline` were `drawString`/`renderOutline`; screens override `extractRenderState`/`extractBackground` (`render`/`renderBackground` before) | `HudCompat`, `CompatScreen` |
+| 26.x | `EntityTypes.PLAYER` (`EntityType.PLAYER` before) | `TextCompat`, `DeathMessagesTest` |
+| 26.x | Fabric `ClientCommands` (`ClientCommandManager` before) | `CommandCompat` |
+| 26.x | `Gui.setScreen` / `Gui.screen()` (`Minecraft.setScreen` / `Minecraft.screen` before) | `ClientCompat` |
+| ≤1.21.11 | Remapping Loom drops YACL's nested libraries in dev: `localRuntime` quilt-parsers + imageio-webp | `build.gradle.kts` |

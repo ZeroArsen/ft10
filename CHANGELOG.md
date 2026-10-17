@@ -1,7 +1,7 @@
 # Changelog
 
 ## 0.1.0 — unreleased
-First version, Minecraft 26.2.
+First version, Minecraft 26.2 and 1.21.11.
 
 - Per-opponent first-to scores, shown above the action bar.
 - Kills are also seen through the entity death event, so instant-respawn servers count correctly.

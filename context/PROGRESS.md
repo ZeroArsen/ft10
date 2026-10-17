@@ -11,15 +11,19 @@
 - [x] **4. Real test** — RCON-driven two-player run on a Fabric 26.2 server (found and fixed the instant-respawn
   miss) and a Paper 26.2 run of the server integration (found and fixed the hello timing). See `TESTING.md`.
 - [x] **4b. Round 2 features** — HUD editor, hotkeys, server integration protocol v1, author 0Arsen.
-- [ ] **4c. RevoltFFA bridge** — `Ft10Bridge` in `C:/dev/mc-plugins/RevoltFFA` (left uncommitted for review);
-  real test needs the 1.21.11 port.
-- [ ] **5. Multi-version** — 26.3 and 26.1.2 first, then 1.21.11 down to 1.21.1. Versions per node are
+- [ ] **4c. RevoltFFA bridge** — `Ft10Bridge` in `C:/dev/mc-plugins/RevoltFFA` (left uncommitted for review).
+  Tested 2026-10-17 with the 1.21.11 build on a copy of its dev server (`TESTING.md`): hello, arena kill, combat
+  log and lobby deaths all correct. Open: turning `integration.ft10` off mid-connection leaves FT10 counting
+  nothing until rejoin; a player without the mod is untested.
+- [ ] **5. Multi-version** — **1.21.11 done** (2026-10-17: both jars build, 36 tests pass on each, RCON
+  two-player run in `TESTING.md`). Left: 26.3 and 26.1.2, then 1.21.10 down to 1.21.1. Versions per node are
   already looked up (see below).
 - [ ] **6. Release** — GitHub repo, CI publish, Modrinth project page, v1.0.0.
 
 ## Next task
-Port to 1.21.11 (the owner's RevoltFFA server version) so the integration can be tested for real, then the
-other versions. Owner tests on public servers in the meantime.
+The owner reviews and commits RevoltFFA's `Ft10Bridge`, then tries the 1.21.11 jar on the real RevoltFFA server.
+Next port: 26.1.2 (it settles whether each `>=26.1` guard really belongs at 26.1, see ARCHITECTURE.md) and 26.3,
+then 1.21.10 down to 1.21.1 (the 1.21.9, 1.21.6 and 1.21.5 boundaries in ARCHITECTURE.md still need guards).
 
 ## Dependency versions per node (Modrinth, 2026-10-17)
 | Node | Fabric API | YACL | Mod Menu |
