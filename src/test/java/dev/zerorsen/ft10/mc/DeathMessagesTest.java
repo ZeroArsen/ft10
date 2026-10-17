@@ -1,10 +1,12 @@
 package dev.zerorsen.ft10.mc;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import dev.zerorsen.ft10.core.DeathMessageParser;
+import dev.zerorsen.ft10.core.PlayerRef;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -24,7 +26,11 @@ import org.junit.jupiter.api.Test;
 class DeathMessagesTest {
     private static final UUID STEVE = UUID.randomUUID();
     private static final UUID ALEX = UUID.randomUUID();
+    private static final UUID ME_ID = UUID.randomUUID();
+    private static final PlayerRef ME = PlayerRef.of(ME_ID, "Me");
     private static final DeathMessageParser NO_PATTERNS = new DeathMessageParser(false, List.of());
+    private static final DeathMessageParser PRESETS = new DeathMessageParser(true, List.of());
+    private static final DeathMessages.Context CONTEXT = DeathMessages.Context.of(ME);
 
     @BeforeAll
     static void bootstrap() {
@@ -37,7 +43,7 @@ class DeathMessagesTest {
         Component message = Component.translatable("death.attack.player",
             name(EntityTypes.PLAYER, STEVE, "Steve"), name(EntityTypes.PLAYER, ALEX, "Alex"));
 
-        DeathMessages.Death death = DeathMessages.parse(message, NO_PATTERNS).orElseThrow();
+        DeathMessages.Death death = DeathMessages.parse(message, NO_PATTERNS, CONTEXT).orElseThrow();
         assertEquals(STEVE, death.victim().uuid());
         assertEquals(ALEX, death.killer().uuid());
         assertEquals("Alex", death.killer().name());
@@ -49,7 +55,7 @@ class DeathMessagesTest {
         Component message = Component.translatable("death.attack.player.item",
             name(EntityTypes.PLAYER, STEVE, "Steve"), name(EntityTypes.PLAYER, ALEX, "Alex"), weapon);
 
-        assertEquals(ALEX, DeathMessages.parse(message, NO_PATTERNS).orElseThrow().killer().uuid());
+        assertEquals(ALEX, DeathMessages.parse(message, NO_PATTERNS, CONTEXT).orElseThrow().killer().uuid());
     }
 
     @Test
@@ -57,7 +63,7 @@ class DeathMessagesTest {
         Component message = Component.translatable("death.attack.mob",
             name(EntityTypes.PLAYER, STEVE, "Steve"), name(EntityTypes.ZOMBIE, UUID.randomUUID(), "Zombie"));
 
-        DeathMessages.Death death = DeathMessages.parse(message, NO_PATTERNS).orElseThrow();
+        DeathMessages.Death death = DeathMessages.parse(message, NO_PATTERNS, CONTEXT).orElseThrow();
         assertEquals(STEVE, death.victim().uuid());
         assertNull(death.killer());
     }
@@ -67,21 +73,99 @@ class DeathMessagesTest {
         Component message = Component.translatable("death.attack.player",
             name(EntityTypes.WOLF, UUID.randomUUID(), "Rex"), name(EntityTypes.PLAYER, ALEX, "Alex"));
 
-        assertTrue(DeathMessages.parse(message, NO_PATTERNS).isEmpty());
+        assertTrue(DeathMessages.parse(message, NO_PATTERNS, CONTEXT).isEmpty());
     }
 
     @Test
     void otherTranslatableMessagesAreIgnored() {
         Component message = Component.translatable("multiplayer.player.joined", name(EntityTypes.PLAYER, ALEX, "Alex"));
-        assertTrue(DeathMessages.parse(message, NO_PATTERNS).isEmpty());
+        assertTrue(DeathMessages.parse(message, NO_PATTERNS, CONTEXT).isEmpty());
     }
 
     @Test
     void plainTextNeedsTheNamesOnTheTabList() {
         // Without a connection there is no tab list, so even a matching plugin message can't be tied to players.
         DeathMessageParser presets = new DeathMessageParser(true, List.of());
-        Optional<DeathMessages.Death> death = DeathMessages.parse(Component.literal("Steve was slain by Alex"), presets);
+        Optional<DeathMessages.Death> death = DeathMessages.parse(Component.literal("Steve was slain by Alex"), presets, CONTEXT);
         assertTrue(death.isEmpty());
+    }
+
+    @Test
+    void wrappedVanillaMessageIsFound() {
+        // Paper plugins often prefix the vanilla message: "☠ " + translatable, inside another component.
+        Component vanilla = Component.translatable("death.attack.player",
+            name(EntityTypes.PLAYER, STEVE, "Steve"), name(EntityTypes.PLAYER, ALEX, "Alex"));
+        Component message = Component.literal("").append(Component.literal("☠ ")).append(vanilla);
+
+        DeathMessages.Death death = DeathMessages.parse(message, NO_PATTERNS, CONTEXT).orElseThrow();
+        assertEquals(STEVE, death.victim().uuid());
+        assertEquals(ALEX, death.killer().uuid());
+        assertEquals("vanilla", death.source());
+    }
+
+    @Test
+    void pluginMessageNamesAreReadFromHovers() {
+        // No tab list in tests: the hover's UUID alone ties the plain-text names to players.
+        Component message = Component.literal("")
+            .append(name(EntityTypes.PLAYER, STEVE, "Steve"))
+            .append(Component.literal(" was slain by "))
+            .append(name(EntityTypes.PLAYER, ALEX, "Alex"));
+
+        DeathMessages.Death death = DeathMessages.parse(message, PRESETS, CONTEXT).orElseThrow();
+        assertEquals(STEVE, death.victim().uuid());
+        assertEquals(ALEX, death.killer().uuid());
+        assertTrue(death.killerKnown());
+        assertEquals("was-killed-by", death.source());
+    }
+
+    @Test
+    void secondPersonKillUsesARecentOpponentByName() {
+        PlayerRef steve = PlayerRef.of(STEVE, "Steve");
+        DeathMessages.Context fought = new DeathMessages.Context(ME,
+            n -> n.equalsIgnoreCase("Steve") ? Optional.of(steve) : Optional.empty(), p -> p.sameAs(steve));
+
+        DeathMessages.Death death = DeathMessages.parse(Component.literal("You killed Steve!"), PRESETS, fought)
+            .orElseThrow();
+        assertEquals(STEVE, death.victim().uuid());
+        assertEquals(ME_ID, death.killer().uuid());
+
+        // Someone we never fought and can't find: not a kill we can count.
+        assertTrue(DeathMessages.parse(Component.literal("You killed Herobrine!"), PRESETS, fought).isEmpty());
+    }
+
+    @Test
+    void ourOwnNameCountsAsUs() {
+        PlayerRef alex = PlayerRef.of(ALEX, "Alex");
+        DeathMessages.Context fought = new DeathMessages.Context(ME,
+            n -> n.equalsIgnoreCase("Alex") ? Optional.of(alex) : Optional.empty(), p -> p.sameAs(alex));
+
+        DeathMessages.Death death = DeathMessages.parse(Component.literal("Me was slain by Alex"), PRESETS, fought)
+            .orElseThrow();
+        assertEquals(ME_ID, death.victim().uuid());
+        assertEquals(ALEX, death.killer().uuid());
+    }
+
+    @Test
+    void loosePatternNeedsACurrentFight() {
+        PlayerRef alex = PlayerRef.of(ALEX, "Alex");
+        Component message = Component.literal("You were struck down by Alex");
+        DeathMessages.Context notFighting = new DeathMessages.Context(ME, n -> Optional.of(alex), p -> false);
+        DeathMessages.Context fighting = new DeathMessages.Context(ME, n -> Optional.of(alex), p -> p.sameAs(alex));
+
+        assertTrue(DeathMessages.parse(message, PRESETS, notFighting).isEmpty());
+        assertEquals(ALEX, DeathMessages.parse(message, PRESETS, fighting).orElseThrow().killer().uuid());
+    }
+
+    @Test
+    void messageWithoutKillerLeavesItToTheHits() {
+        DeathMessageParser parser = new DeathMessageParser(false, List.of("{victim} fell into the void"));
+        Component message = Component.literal("")
+            .append(name(EntityTypes.PLAYER, STEVE, "Steve"))
+            .append(Component.literal(" fell into the void"));
+
+        DeathMessages.Death death = DeathMessages.parse(message, parser, CONTEXT).orElseThrow();
+        assertNull(death.killer());
+        assertFalse(death.killerKnown());
     }
 
     private static MutableComponent name(EntityType<?> type, UUID uuid, String name) {

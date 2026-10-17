@@ -16,6 +16,7 @@ import dev.zerorsen.ft10.core.PlayerRef;
 import dev.zerorsen.ft10.core.Rivalry;
 import dev.zerorsen.ft10.core.ScoreBook;
 import dev.zerorsen.ft10.core.Session;
+import dev.zerorsen.ft10.feedback.Debug;
 import dev.zerorsen.ft10.feedback.HudEditorScreen;
 import dev.zerorsen.ft10.feedback.Texts;
 import dev.zerorsen.ft10.mc.Players;
@@ -74,7 +75,10 @@ public final class FtCommand {
             .then(literal("unlock").executes(FtCommand::unlock))
             .then(literal("list").executes(FtCommand::list))
             .then(literal("hud").executes(FtCommand::hud))
-            .then(literal("config").executes(FtCommand::config));
+            .then(literal("config").executes(FtCommand::config))
+            .then(literal("debug")
+                .executes(FtCommand::toggleDebug)
+                .then(literal("last").executes(FtCommand::debugLast)));
     }
 
     /** Online players plus everyone we have a score with on this server. */
@@ -130,6 +134,7 @@ public final class FtCommand {
         helpLine(ctx, root, " list", "ft10.help.list");
         helpLine(ctx, root, " hud", "ft10.help.hud");
         helpLine(ctx, root, " config", "ft10.help.config");
+        helpLine(ctx, root, " debug [last]", "ft10.help.debug");
         return OK;
     }
 
@@ -278,6 +283,26 @@ public final class FtCommand {
 
     private static int hud(CommandContext<FabricClientCommandSource> ctx) {
         Ft10.get().openScreenNextTick(new HudEditorScreen(null));
+        return OK;
+    }
+
+    private static int toggleDebug(CommandContext<FabricClientCommandSource> ctx) {
+        Debug debug = Ft10.get().debug();
+        debug.setEnabled(!debug.enabled());
+        feedback(ctx, debug.enabled()
+            ? Texts.colored(Texts.SUCCESS, "ft10.debug.on")
+            : Texts.body("ft10.debug.off"));
+        return OK;
+    }
+
+    private static int debugLast(CommandContext<FabricClientCommandSource> ctx) {
+        List<Debug.Unrecognized> recent = Ft10.get().debug().recent();
+        if (recent.isEmpty()) {
+            feedback(ctx, Texts.body("ft10.debug.last.empty"));
+            return OK;
+        }
+        feedback(ctx, Texts.body("ft10.debug.last.header", Texts.value(recent.size())));
+        for (Debug.Unrecognized entry : recent) ctx.getSource().sendFeedback(Debug.describe(entry));
         return OK;
     }
 

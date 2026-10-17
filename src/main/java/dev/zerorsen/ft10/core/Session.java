@@ -1,5 +1,6 @@
 package dev.zerorsen.ft10.core;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -14,13 +15,18 @@ public final class Session {
      * @param switchOnHit    show whoever we start fighting (otherwise only kills switch the screen)
      * @param goal           first-to target, 0 for none
      * @param autoNewSet     start a new set at 0 - 0 once someone reaches the goal
+     * @param countCombatLogs an opponent who leaves mid-fight counts as killed by us
      */
-    public record Rules(long combatWindowMs, long switchLockMs, boolean switchOnHit, int goal, boolean autoNewSet) {}
+    public record Rules(long combatWindowMs, long switchLockMs, boolean switchOnHit, int goal, boolean autoNewSet,
+                        boolean countCombatLogs) {}
 
     public interface Listener {
         void onScore(ScoreUpdate update);
 
         void onActiveChanged(Rivalry rivalry);
+
+        /** A death was settled (with or without a point for us). */
+        default void onKill(KillDetector.Kill kill) {}
     }
 
     private final PlayerRef self;
@@ -73,6 +79,50 @@ public final class Session {
         detector.onDeathSeen(victim, guess, now);
     }
 
+    /**
+     * A kill counter (sidebar "Kills") went up: we probably killed whoever we hit last. Returns that guess. The
+     * guess is weak, so it is dropped if a real kill of ours is settled around the same time.
+     */
+    public Optional<PlayerRef> onKillCounted(long now) {
+        Optional<PlayerRef> victim = tracker.lastVictimOfSelf(now, rules.get().combatWindowMs());
+        victim.ifPresent(v -> detector.onDeathSeen(v, self, now, true));
+        return victim;
+    }
+
+    /** A death counter (sidebar "Deaths") went up: we died, though the client may have seen nothing of it. */
+    public void onDeathCounted(long now) {
+        onDeathSeen(self, now);
+    }
+
+    /**
+     * A player left the server (tab list). With {@link Rules#countCombatLogs()}, leaving while fighting us counts
+     * as our kill; returns that opponent.
+     */
+    public Optional<PlayerRef> onPlayerLeft(String key, long now) {
+        Rules r = rules.get();
+        if (!r.countCombatLogs()) return Optional.empty();
+        Optional<PlayerRef> opponent = tracker.opponent(key, now, r.combatWindowMs());
+        opponent.ifPresent(o -> detector.onDeathSeen(o, self, now));
+        return opponent;
+    }
+
+    /** Someone we fought within the kill credit window, looked up by name (case-insensitive). */
+    public Optional<PlayerRef> recentOpponent(String name, long now) {
+        return tracker.recentOpponents(now, rules.get().combatWindowMs()).stream()
+            .filter(p -> p.name().equalsIgnoreCase(name))
+            .findFirst();
+    }
+
+    /** Did we fight {@code other} within the kill credit window? */
+    public boolean fighting(PlayerRef other, long now) {
+        return other != null && tracker.recentlyFought(other.key(), now, rules.get().combatWindowMs());
+    }
+
+    /** Names of everyone we fought in the last minute, for spotting kill messages FT10 doesn't understand. */
+    public List<PlayerRef> recentOpponents(long now) {
+        return tracker.recentOpponents(now, 60_000);
+    }
+
     public void tick(long now) {
         for (KillDetector.Kill kill : detector.tick(now)) settle(kill, now);
         tracker.prune(now);
@@ -110,6 +160,7 @@ public final class Session {
         PlayerRef victim = kill.victim();
         PlayerRef killer = kill.killer();
         tracker.forget(victim);
+        listener.onKill(kill);
 
         if (self.sameAs(victim)) {
             tracker.forgetExchanges();

@@ -126,10 +126,17 @@ public final class ConfigScreen {
                     .description(describe("customPatterns"))
                     .binding(new ArrayList<>(), () -> new ArrayList<>(c.customPatterns), v -> c.customPatterns = clean(v))
                     .controller(StringControllerBuilder::create)
-                    .initial("^(?<victim>\\w+) was killed by (?<killer>\\w+)")
+                    .initial("{victim} was killed by {killer}")
                     .insertEntriesAtEnd(true)
                     .collapsed(c.customPatterns.isEmpty())
                     .build())
+                .option(bool("countCombatLogs", d.countCombatLogs, () -> c.countCombatLogs,
+                    v -> c.countCombatLogs = v))
+                .option(bool("useSidebarStats", d.useSidebarStats, () -> c.useSidebarStats,
+                    v -> c.useSidebarStats = v))
+                .group(labels("statKillLabels", d.statKillLabels, () -> c.statKillLabels, v -> c.statKillLabels = v))
+                .group(labels("statDeathLabels", d.statDeathLabels, () -> c.statDeathLabels,
+                    v -> c.statDeathLabels = v))
                 .build())
             .save(() -> Ft10.get().saveConfig())
             .build()
@@ -142,6 +149,26 @@ public final class ConfigScreen {
         for (String p : patterns) {
             if (p != null && !p.isBlank() && DeathMessageParser.validate(p) == null) out.add(p);
         }
+        return out;
+    }
+
+    /** A collapsed list of sidebar labels ("Kills", "Deaths"); blank entries are dropped. */
+    private static ListOption<String> labels(String key, List<String> def, Supplier<List<String>> get,
+                                             Consumer<List<String>> set) {
+        return ListOption.<String>createBuilder()
+            .name(text(key))
+            .description(describe(key))
+            .binding(new ArrayList<>(def), () -> new ArrayList<>(get.get()), v -> set.accept(nonBlank(v)))
+            .controller(StringControllerBuilder::create)
+            .initial("")
+            .insertEntriesAtEnd(true)
+            .collapsed(true)
+            .build();
+    }
+
+    private static List<String> nonBlank(List<String> values) {
+        List<String> out = new ArrayList<>();
+        for (String v : values) if (v != null && !v.isBlank()) out.add(v.strip());
         return out;
     }
 

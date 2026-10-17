@@ -5,14 +5,22 @@ import dev.zerorsen.ft10.config.ConfigManager;
 import dev.zerorsen.ft10.config.Ft10Config;
 import dev.zerorsen.ft10.config.ScoreStorage;
 import dev.zerorsen.ft10.core.DeathMessageParser;
+import dev.zerorsen.ft10.core.KillDetector;
 import dev.zerorsen.ft10.core.PlayerRef;
+import dev.zerorsen.ft10.core.RepeatGuard;
+import dev.zerorsen.ft10.core.Rivalry;
+import dev.zerorsen.ft10.core.ScoreUpdate;
 import dev.zerorsen.ft10.core.Session;
+import dev.zerorsen.ft10.core.StatWatcher;
+import dev.zerorsen.ft10.feedback.Debug;
 import dev.zerorsen.ft10.feedback.Notifier;
 import dev.zerorsen.ft10.mc.DeathMessages;
 import dev.zerorsen.ft10.mc.Players;
 import dev.zerorsen.ft10.mc.ServerKey;
+import dev.zerorsen.ft10.mc.Sidebar;
 import java.nio.file.Path;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -27,18 +35,37 @@ import net.minecraft.world.entity.player.Player;
 
 /**
  * The mod's runtime: owns the config, the stored scores and the {@link Session} of the current connection, and
- * forwards what happens in the game (hits, deaths, death messages) to that session.
+ * forwards what happens in the game (hits, deaths, kill messages, sidebar counters) to that session.
  */
 public final class Ft10 {
+    /** A repeated action bar or title counts again only after it was gone this long. */
+    private static final long REPEAT_MS = 8_000;
+    /** A subtitle this recent is read together with the title ("KILL!" + "Steve"). */
+    private static final long SUBTITLE_PAIR_MS = 1_000;
+    private static final int SIDEBAR_EVERY_TICKS = 5;
+    private static final int MAX_MESSAGE_LENGTH = 512;
+
+    private static final String CHAT = "ft10.debug.channel.chat";
+    private static final String ACTION_BAR = "ft10.debug.channel.action_bar";
+    private static final String TITLE = "ft10.debug.channel.title";
+    private static final String SUBTITLE = "ft10.debug.channel.subtitle";
+    private static final String DEATH_SCREEN = "ft10.debug.channel.death_screen";
+
     private static Ft10 instance;
 
     private final ConfigManager config;
     private final ScoreStorage storage;
     private final Notifier notifier;
+    private final Debug debug = new Debug();
+    private final RepeatGuard repeats = new RepeatGuard(REPEAT_MS);
+    private final StatWatcher stats = new StatWatcher();
     private DeathMessageParser parser;
     private Session session;
     private final Set<UUID> deadPlayers = new HashSet<>();
     private Screen pendingScreen;
+    private Component lastSubtitle;
+    private long lastSubtitleAt;
+    private int ticks;
 
     private Ft10(Path configDir, Path gameDir) {
         this.config = new ConfigManager(configDir.resolve("ft10.json"));
@@ -76,6 +103,10 @@ public final class Ft10 {
         return parser;
     }
 
+    public Debug debug() {
+        return debug;
+    }
+
     /** Opens a screen on the next tick (opening it from a chat command would be closed with the chat). */
     public void openScreenNextTick(Screen screen) {
         pendingScreen = screen;
@@ -88,15 +119,15 @@ public final class Ft10 {
             ? Players.of(minecraft.player)
             : PlayerRef.named(minecraft.getUser().getName());
         String server = ServerKey.current(minecraft);
-        session = new Session(self, storage.book(server), this::rules, notifier);
-        deadPlayers.clear();
+        session = new Session(self, storage.book(server), this::rules, new SessionListener());
+        resetSignals();
         Ft10Client.LOGGER.debug("FT10 session started on {} as {}", server, self.name());
     }
 
     void onDisconnect() {
         storage.flush(config().saveScores);
         session = null;
-        deadPlayers.clear();
+        resetSignals();
     }
 
     void onStopping() {
@@ -112,9 +143,17 @@ public final class Ft10 {
         long now = System.currentTimeMillis();
         if (session != null && minecraft.level != null && config().enabled) {
             scanDeaths(minecraft, minecraft.level, now);
+            if (++ticks % SIDEBAR_EVERY_TICKS == 0) readSidebar(minecraft.level, now);
             session.tick(now);
         }
         storage.tick(now, config().saveScores);
+    }
+
+    private void resetSignals() {
+        deadPlayers.clear();
+        repeats.clear();
+        stats.clear();
+        lastSubtitle = null;
     }
 
     // ---- game signals ---------------------------------------------------------------------------------------
@@ -136,7 +175,7 @@ public final class Ft10 {
         if (!tracking() || minecraft.level == null) return;
         if (packet.getEntity(minecraft.level) instanceof Player player && player != minecraft.player) {
             deadPlayers.add(player.getUUID());
-            session.onDeathSeen(Players.of(player), System.currentTimeMillis());
+            deathSeen(Players.of(player), "ft10.debug.source.event", System.currentTimeMillis());
         }
     }
 
@@ -150,19 +189,101 @@ public final class Ft10 {
         Minecraft minecraft = Minecraft.getInstance();
         if (!tracking() || minecraft.player == null || playerId != minecraft.player.getId()) return;
         long now = System.currentTimeMillis();
-        Optional<DeathMessages.Death> death = DeathMessages.parse(message, parser);
+        Optional<DeathMessages.Death> death = DeathMessages.parse(message, parser, context(now));
         if (death.isPresent() && death.get().victim().sameAs(session.self())) {
-            session.onDeathMessage(session.self(), death.get().killer(), now);
+            apply(death.get(), DEATH_SCREEN, now);
         } else {
-            session.onDeathSeen(session.self(), now);
+            deathSeen(session.self(), "ft10.debug.source.death_screen", now);
         }
     }
 
-    /** A system (non-player) chat message. Death messages are read from here. */
+    /** A system (non-player) chat message, or an action bar sent as one. */
     public void onGameMessage(Component message, boolean overlay) {
-        if (overlay || !tracking()) return;
-        DeathMessages.parse(message, parser)
-            .ifPresent(d -> session.onDeathMessage(d.victim(), d.killer(), System.currentTimeMillis()));
+        if (overlay) onActionBar(message);
+        else readMessage(message, CHAT, System.currentTimeMillis());
+    }
+
+    public void onActionBar(Component message) {
+        long now = System.currentTimeMillis();
+        if (repeated(ACTION_BAR, message, now)) return;
+        readMessage(message, ACTION_BAR, now);
+    }
+
+    public void onTitle(Component title) {
+        long now = System.currentTimeMillis();
+        Component subtitle = lastSubtitle != null && now - lastSubtitleAt <= SUBTITLE_PAIR_MS ? lastSubtitle : null;
+        Component text = subtitle == null ? title : Component.empty().append(title).append(" ").append(subtitle);
+        if (repeated(TITLE, text, now)) return;
+        if (subtitle != null && read(title, TITLE, now, false)) return;
+        readMessage(text, TITLE, now);
+    }
+
+    public void onSubtitle(Component subtitle) {
+        long now = System.currentTimeMillis();
+        lastSubtitle = subtitle;
+        lastSubtitleAt = now;
+        if (repeated(SUBTITLE, subtitle, now)) return;
+        read(subtitle, SUBTITLE, now, false); // unrecognized subtitles are logged with their title
+    }
+
+    /** Players left the tab list; with "count combat logs" on, leaving mid-fight is our kill. */
+    public void onPlayersLeft(List<UUID> ids) {
+        if (!tracking()) return;
+        long now = System.currentTimeMillis();
+        for (UUID id : ids) {
+            session.onPlayerLeft(id.toString(), now).ifPresent(p -> debug.signal("ft10.debug.left", p));
+        }
+    }
+
+    // ---- reading signals ------------------------------------------------------------------------------------
+
+    private void readMessage(Component message, String channel, long now) {
+        read(message, channel, now, true);
+    }
+
+    /** Parses one message; true if it was a death. */
+    private boolean read(Component message, String channel, long now, boolean reportUnrecognized) {
+        if (!tracking()) return false;
+        String text = message.getString();
+        if (text.isBlank() || text.length() > MAX_MESSAGE_LENGTH) return false;
+        Optional<DeathMessages.Death> death = DeathMessages.parse(message, parser, context(now));
+        if (death.isPresent()) {
+            apply(death.get(), channel, now);
+            return true;
+        }
+        if (reportUnrecognized && aboutAFight(text, now)) debug.unrecognized(channel, DeathMessageParser.strip(text));
+        return false;
+    }
+
+    private void apply(DeathMessages.Death death, String channel, long now) {
+        Component where = Component.translatable(channel);
+        if (death.killerKnown()) {
+            debug.signal("ft10.debug.message", where, death.victim(), death.killer(), death.source());
+            session.onDeathMessage(death.victim(), death.killer(), now);
+        } else {
+            debug.signal("ft10.debug.message_guess", where, death.victim(), death.source());
+            session.onDeathSeen(death.victim(), now);
+        }
+    }
+
+    private void deathSeen(PlayerRef victim, String sourceKey, long now) {
+        if (victim.sameAs(session.self()) || session.fighting(victim, now)) {
+            debug.signal("ft10.debug.death_seen", victim, Component.translatable(sourceKey));
+        }
+        session.onDeathSeen(victim, now);
+    }
+
+    /** Did this text name us or someone we just fought? Then a kill message may be hiding in it. */
+    private boolean aboutAFight(String text, long now) {
+        if (Players.mentions(text, session.self().name())) return true;
+        for (PlayerRef opponent : session.recentOpponents(now)) {
+            if (Players.mentions(text, opponent.name())) return true;
+        }
+        return false;
+    }
+
+    private boolean repeated(String channel, Component message, long now) {
+        return !repeats.isNew(channel + '\u0000' + message.getString(), now);
     }
 
     /** Other players' deaths show up as their health dropping to 0. */
@@ -173,12 +294,33 @@ public final class Ft10 {
             UUID id = player.getUUID();
             seen.add(id);
             if (player.isDeadOrDying()) {
-                if (deadPlayers.add(id)) session.onDeathSeen(Players.of(player), now);
+                if (deadPlayers.add(id)) deathSeen(Players.of(player), "ft10.debug.source.health", now);
             } else {
                 deadPlayers.remove(id);
             }
         }
         deadPlayers.retainAll(seen);
+    }
+
+    /** "Kills: 12" → "Kills: 13" in the sidebar, for servers that never really kill anyone. */
+    private void readSidebar(ClientLevel level, long now) {
+        Ft10Config c = config();
+        if (!c.useSidebarStats) return;
+        for (StatWatcher.Change change : stats.update(Sidebar.lines(level), c.statKillLabels, c.statDeathLabels)) {
+            if (change.stat() == StatWatcher.Stat.KILLS) {
+                Optional<PlayerRef> victim = session.onKillCounted(now);
+                if (victim.isPresent()) debug.signal("ft10.debug.stat_kill", change.from(), change.to(), victim.get());
+                else debug.signal("ft10.debug.stat_kill_nobody", change.from(), change.to());
+            } else {
+                debug.signal("ft10.debug.stat_death", change.from(), change.to());
+                session.onDeathCounted(now);
+            }
+        }
+    }
+
+    private DeathMessages.Context context(long now) {
+        Session s = session;
+        return new DeathMessages.Context(s.self(), name -> s.recentOpponent(name, now), p -> s.fighting(p, now));
     }
 
     private boolean tracking() {
@@ -188,12 +330,34 @@ public final class Ft10 {
     private Session.Rules rules() {
         Ft10Config c = config();
         return new Session.Rules(c.combatTimeoutSeconds * 1000L, c.switchLockSeconds * 1000L, c.switchOnHit,
-            c.goal, c.autoNewSet);
+            c.goal, c.autoNewSet, c.countCombatLogs);
     }
 
     private void rebuildParser() {
         Ft10Config c = config();
         parser = new DeathMessageParser(c.usePresetPatterns, c.customPatterns);
         parser.errors().forEach(error -> Ft10Client.LOGGER.warn("Ignoring death message pattern: {}", error));
+    }
+
+    /** Points go to the notifier; settled deaths that involve us are explained in debug mode. */
+    private final class SessionListener implements Session.Listener {
+        @Override
+        public void onScore(ScoreUpdate update) {
+            notifier.onScore(update);
+        }
+
+        @Override
+        public void onActiveChanged(Rivalry rivalry) {
+            notifier.onActiveChanged(rivalry);
+        }
+
+        @Override
+        public void onKill(KillDetector.Kill kill) {
+            if (session == null) return;
+            PlayerRef self = session.self();
+            if (!self.sameAs(kill.victim()) && !self.sameAs(kill.killer())) return;
+            if (kill.killer() == null) debug.signal("ft10.debug.kill_nobody", kill.victim());
+            else debug.signal("ft10.debug.kill", kill.victim(), kill.killer());
+        }
     }
 }

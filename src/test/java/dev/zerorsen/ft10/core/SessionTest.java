@@ -25,7 +25,7 @@ class SessionTest {
 
     @BeforeEach
     void setUp() {
-        rules = new Session.Rules(10_000, 5_000, true, 0, true);
+        rules = new Session.Rules(10_000, 5_000, true, 0, true, false);
         book = new ScoreBook();
         updates.clear();
         now = 1_000_000;
@@ -179,7 +179,7 @@ class SessionTest {
 
     @Test
     void goalFinishesSetAndStartsANewOne() {
-        rules = new Session.Rules(10_000, 5_000, true, 3, true);
+        rules = new Session.Rules(10_000, 5_000, true, 3, true, false);
         killed(ALEX);
         diedTo(ALEX);
         killed(ALEX);
@@ -196,7 +196,7 @@ class SessionTest {
 
     @Test
     void undoRevertsAFinishedSet() {
-        rules = new Session.Rules(10_000, 5_000, true, 2, true);
+        rules = new Session.Rules(10_000, 5_000, true, 2, true, false);
         killed(ALEX);
         killed(ALEX);
         assertEquals(1, book.rivalry(ALEX).setsMe());
@@ -208,7 +208,7 @@ class SessionTest {
 
     @Test
     void withoutAutoNewSetTheGoalIsAnnouncedOnce() {
-        rules = new Session.Rules(10_000, 5_000, true, 2, false);
+        rules = new Session.Rules(10_000, 5_000, true, 2, false, false);
         killed(ALEX);
         killed(ALEX);
         killed(ALEX);
@@ -222,6 +222,86 @@ class SessionTest {
     void nameOnlyRefMatchesByName() {
         PlayerRef byName = PlayerRef.named("me");
         assertTrue(ME.sameAs(byName));
+    }
+
+    @Test
+    void killCounterCreditsTheLastPlayerWeHit() {
+        session.onHit(ME, BOB, now);
+        session.onHit(ME, ALEX, now + 500);
+        assertTrue(session.onKillCounted(now + 600).orElseThrow().sameAs(ALEX));
+        session.tick(now + 600 + KillDetector.PENDING_MS);
+        assertScore(ALEX, 1, 0);
+        assertEquals(0, book.rivalry(BOB).me());
+    }
+
+    @Test
+    void killCounterAndDeathMessageCountOnce() {
+        session.onHit(ME, ALEX, now);
+        session.onKillCounted(now + 100);
+        session.onDeathMessage(ALEX, ME, now + 300);
+        session.tick(now + 5_000);
+        assertScore(ALEX, 1, 0);
+        assertEquals(1, updates.size());
+    }
+
+    @Test
+    void wrongKillCounterGuessIsDropped() {
+        // We hit Alex last, but the death message says we killed Bob: the counter meant Bob.
+        session.onHit(ME, BOB, now);
+        session.onHit(ME, ALEX, now + 200);
+        session.onKillCounted(now + 300);
+        session.onDeathMessage(BOB, ME, now + 500);
+        session.tick(now + 5_000);
+        assertScore(BOB, 1, 0);
+        assertEquals(0, book.rivalry(ALEX).me());
+        assertEquals(1, updates.size());
+    }
+
+    @Test
+    void killCounterWithoutAFightScoresNothing() {
+        assertTrue(session.onKillCounted(now).isEmpty());
+        session.tick(now + 5_000);
+        assertTrue(updates.isEmpty());
+    }
+
+    @Test
+    void killCounterIgnoresPlayersWhoOnlyHitUs() {
+        session.onHit(ALEX, ME, now);
+        assertTrue(session.onKillCounted(now + 100).isEmpty());
+        session.onSwing(BOB, now + 200);
+        assertTrue(session.onKillCounted(now + 300).orElseThrow().sameAs(BOB), "a swing counts as attacking");
+    }
+
+    @Test
+    void deathCounterGoesToTheLastAttacker() {
+        session.onHit(ALEX, ME, now);
+        session.onDeathCounted(now + 100);
+        session.tick(now + 100 + KillDetector.PENDING_MS);
+        assertScore(ALEX, 0, 1);
+    }
+
+    @Test
+    void combatLogCountsOnlyWhenEnabled() {
+        session.onHit(ME, ALEX, now);
+        assertTrue(session.onPlayerLeft(ALEX.key(), now + 1_000).isEmpty());
+        session.tick(now + 5_000);
+        assertTrue(updates.isEmpty());
+
+        rules = new Session.Rules(10_000, 5_000, true, 0, true, true);
+        now += 10_000;
+        session.onHit(ME, ALEX, now);
+        assertTrue(session.onPlayerLeft(ALEX.key(), now + 1_000).isPresent());
+        assertTrue(session.onPlayerLeft(BOB.key(), now + 1_000).isEmpty(), "never fought Bob");
+        session.tick(now + 5_000);
+        assertScore(ALEX, 1, 0);
+    }
+
+    @Test
+    void recentOpponentIsFoundByName() {
+        session.onHit(ALEX, ME, now);
+        assertTrue(session.recentOpponent("alex", now + 1_000).isPresent());
+        assertTrue(session.recentOpponent("alex", now + 20_000).isEmpty());
+        assertTrue(session.fighting(ALEX, now + 1_000));
     }
 
     private void killed(PlayerRef victim) {

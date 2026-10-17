@@ -69,6 +69,36 @@ public final class Players {
         return Optional.empty();
     }
 
+    /**
+     * A player whose tab list or nametag display name (nick, rank, team colors) contains {@code name} as a word,
+     * for plugins that print display names instead of account names.
+     */
+    public static Optional<PlayerRef> byDisplayName(String name) {
+        if (name == null || name.isBlank()) return Optional.empty();
+        for (PlayerInfo info : online()) {
+            Component display = info.getTabListDisplayName();
+            if (display != null && mentions(display.getString(), name)) return Optional.of(ref(info));
+        }
+        Minecraft minecraft = Minecraft.getInstance();
+        if (minecraft != null && minecraft.level != null) {
+            for (Player player : minecraft.level.players()) {
+                if (mentions(player.getDisplayName().getString(), name)) return Optional.of(of(player));
+            }
+        }
+        return Optional.empty();
+    }
+
+    /** Does {@code text} ("[VIP] §aAlex ✦") name {@code name}, as a whole or as one of its words? */
+    public static boolean mentions(String text, String name) {
+        if (text == null || name == null) return false;
+        String plain = DeathMessageParser.strip(text);
+        if (plain.equalsIgnoreCase(name)) return true;
+        for (String word : plain.split("\\s+")) {
+            if (word.replaceAll("[^\\w.*]", "").equalsIgnoreCase(name)) return true;
+        }
+        return false;
+    }
+
     /** Names of everyone on the tab list, for command suggestions. */
     public static List<String> onlineNames() {
         List<String> names = new ArrayList<>();

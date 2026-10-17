@@ -64,6 +64,8 @@ loom {
         generateRunConfig = true
         runDirectory = rootProject.file(runRoot)
         jvmArguments.add("-Dmixin.debug.export=true")
+        // `-Pft10.debug` starts the dev clients with /ft debug on (kill signals explained in chat and the log).
+        if (providers.gradleProperty("ft10.debug").isPresent) jvmArguments.add("-Dft10.debug=true")
     }
 
     // `-Pft10.join=localhost` makes both dev clients join that server straight away (see context/TESTING.md).

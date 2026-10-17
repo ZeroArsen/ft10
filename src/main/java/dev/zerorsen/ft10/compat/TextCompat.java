@@ -38,6 +38,11 @@ public final class TextCompat {
         return style.withClickEvent(new ClickEvent.RunCommand(command));
     }
 
+    /** Clicking copies {@code text} to the clipboard (local, nothing is sent). */
+    public static Style copyToClipboard(Style style, String text) {
+        return style.withClickEvent(new ClickEvent.CopyToClipboard(text));
+    }
+
     public static Style hoverText(Style style, Component text) {
         return style.withHoverEvent(new HoverEvent.ShowText(text));
     }

@@ -47,6 +47,12 @@ public final class Ft10Config {
     public boolean switchOnHit = true;
     public boolean usePresetPatterns = true;
     public List<String> customPatterns = new ArrayList<>();
+    /** Read "Kills: n" / "Deaths: n" from the sidebar, for servers that fake deaths. */
+    public boolean useSidebarStats = true;
+    public List<String> statKillLabels = new ArrayList<>(List.of("Kills"));
+    public List<String> statDeathLabels = new ArrayList<>(List.of("Deaths"));
+    /** An opponent who leaves the server mid-fight counts as our kill. */
+    public boolean countCombatLogs = false;
 
     // First-to goal
     public int goal = 0;
@@ -60,6 +66,8 @@ public final class Ft10Config {
     void sanitize() {
         if (hudVisibility == null) hudVisibility = HudVisibility.ALWAYS;
         if (customPatterns == null) customPatterns = new ArrayList<>();
+        if (statKillLabels == null) statKillLabels = new ArrayList<>(List.of("Kills"));
+        if (statDeathLabels == null) statDeathLabels = new ArrayList<>(List.of("Deaths"));
         hudHideAfterSeconds = clamp(hudHideAfterSeconds, 1, 600);
         hudScale = Math.max(0.5f, Math.min(3.0f, hudScale));
         titleFadeIn = clamp(titleFadeIn, 0, 100);
