@@ -29,3 +29,16 @@ app installs required dependencies automatically; Mod Menu only adds the setting
 
 **D9 — Dependencies come from Modrinth Maven** (`maven.modrinth:yacl`, `maven.modrinth:modmenu`): one
 repository, version numbers identical to the Modrinth pages.
+
+**D10 — Author name `0Arsen`.** The owner's in-game and Modrinth name; GitHub is `ZeroArsen` only because
+`0Arsen` was taken there. Git commits keep `0Arsen` with the GitHub noreply address.
+
+**D11 — Instant-respawn deaths come from the entity death event.** The 2026-10-17 two-player test showed that
+with instant respawn other clients never see the victim's health reach 0. `ServerPlayer.die` broadcasts entity
+event 3, which arrives in time; the health scan stays as a fallback.
+
+**D12 — Server integration protocol v1** (`docs/SERVER_INTEGRATION.md`). Plugin channels `ft10:hello` and
+`ft10:kill`; after hello, FT10 trusts only the server's kill reports on that connection. Fields are only ever
+appended; decoders skip unknown bytes and never throw, so a buggy or newer plugin can't kick players. Hello
+must be sent when the client registers `ft10:hello` itself: Paper silently drops messages on channels the client
+hasn't registered yet, and Fabric registers `ft10:kill` first (found in the Paper 26.2 test).

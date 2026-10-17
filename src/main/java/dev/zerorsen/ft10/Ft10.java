@@ -1,6 +1,7 @@
 package dev.zerorsen.ft10;
 
 import dev.zerorsen.ft10.compat.ClientCompat;
+import dev.zerorsen.ft10.compat.HudCompat;
 import dev.zerorsen.ft10.config.ConfigManager;
 import dev.zerorsen.ft10.config.Ft10Config;
 import dev.zerorsen.ft10.config.ScoreStorage;
@@ -8,9 +9,11 @@ import dev.zerorsen.ft10.core.DeathMessageParser;
 import dev.zerorsen.ft10.core.PlayerRef;
 import dev.zerorsen.ft10.core.Session;
 import dev.zerorsen.ft10.feedback.Notifier;
+import dev.zerorsen.ft10.feedback.Texts;
 import dev.zerorsen.ft10.mc.DeathMessages;
 import dev.zerorsen.ft10.mc.Players;
 import dev.zerorsen.ft10.mc.ServerKey;
+import dev.zerorsen.ft10.net.Ft10Protocol;
 import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Optional;
@@ -39,6 +42,8 @@ public final class Ft10 {
     private Session session;
     private final Set<UUID> deadPlayers = new HashSet<>();
     private Screen pendingScreen;
+    /** The server sent ft10:hello: its ft10:kill messages are the truth, our own guesses are switched off. */
+    private boolean serverReportsKills;
 
     private Ft10(Path configDir, Path gameDir) {
         this.config = new ConfigManager(configDir.resolve("ft10.json"));
@@ -96,6 +101,7 @@ public final class Ft10 {
     void onDisconnect() {
         storage.flush(config().saveScores);
         session = null;
+        serverReportsKills = false;
         deadPlayers.clear();
     }
 
@@ -111,7 +117,7 @@ public final class Ft10 {
         }
         long now = System.currentTimeMillis();
         if (session != null && minecraft.level != null && config().enabled) {
-            scanDeaths(minecraft, minecraft.level, now);
+            if (!serverReportsKills) scanDeaths(minecraft, minecraft.level, now);
             session.tick(now);
         }
         storage.tick(now, config().saveScores);
@@ -133,7 +139,7 @@ public final class Ft10 {
     /** An entity-event "death" packet arrived; only other players' deaths matter here. */
     public void onEntityDeath(ClientboundEntityEventPacket packet) {
         Minecraft minecraft = Minecraft.getInstance();
-        if (!tracking() || minecraft.level == null) return;
+        if (!guessing() || minecraft.level == null) return;
         if (packet.getEntity(minecraft.level) instanceof Player player && player != minecraft.player) {
             deadPlayers.add(player.getUUID());
             session.onDeathSeen(Players.of(player), System.currentTimeMillis());
@@ -148,7 +154,7 @@ public final class Ft10 {
     /** The server told a player they died; {@code message} is their death message. */
     public void onCombatKill(int playerId, Component message) {
         Minecraft minecraft = Minecraft.getInstance();
-        if (!tracking() || minecraft.player == null || playerId != minecraft.player.getId()) return;
+        if (!guessing() || minecraft.player == null || playerId != minecraft.player.getId()) return;
         long now = System.currentTimeMillis();
         Optional<DeathMessages.Death> death = DeathMessages.parse(message, parser);
         if (death.isPresent() && death.get().victim().sameAs(session.self())) {
@@ -160,9 +166,27 @@ public final class Ft10 {
 
     /** A system (non-player) chat message. Death messages are read from here. */
     public void onGameMessage(Component message, boolean overlay) {
-        if (overlay || !tracking()) return;
+        if (overlay || !guessing()) return;
         DeathMessages.parse(message, parser)
             .ifPresent(d -> session.onDeathMessage(d.victim(), d.killer(), System.currentTimeMillis()));
+    }
+
+    // ---- server integration (ft10:hello / ft10:kill) --------------------------------------------------------
+
+    void onServerHello(Ft10Protocol.Hello hello) {
+        // May arrive before the JOIN event, so this flag is only reset on disconnect.
+        if (!config().trustServerKills) return;
+        boolean first = !serverReportsKills;
+        serverReportsKills = true;
+        Ft10Client.LOGGER.info("Server reports kills to FT10 (protocol {})", hello.version());
+        if (first && config().chatEnabled) HudCompat.chat(Texts.line(Texts.body("ft10.server.hello")));
+    }
+
+    void onServerKill(Ft10Protocol.Kill kill) {
+        if (!tracking() || !config().trustServerKills || !kill.valid()) return;
+        PlayerRef victim = PlayerRef.of(kill.victim(), kill.victimName());
+        PlayerRef killer = kill.killer() == null ? null : PlayerRef.of(kill.killer(), kill.killerName());
+        session.onDeathMessage(victim, killer, System.currentTimeMillis());
     }
 
     /** Other players' deaths show up as their health dropping to 0. */
@@ -183,6 +207,11 @@ public final class Ft10 {
 
     private boolean tracking() {
         return session != null && config().enabled;
+    }
+
+    /** Whether to work out kills ourselves (death messages, death events, health); off when the server reports them. */
+    private boolean guessing() {
+        return tracking() && !serverReportsKills;
     }
 
     private Session.Rules rules() {

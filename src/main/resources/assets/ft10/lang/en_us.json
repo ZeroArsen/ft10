@@ -11,6 +11,7 @@
   "ft10.chat.set_lost": "You lost %s against %s.",
   "ft10.sets": "Sets %s",
   "ft10.hud.vs": "vs %s",
+  "ft10.server.hello": "This server reports kills to FT10, so every point is exact.",
   "ft10.action.hud_shown": "Score HUD shown",
   "ft10.action.hud_hidden": "Score HUD hidden",
 
@@ -145,6 +146,8 @@
   "ft10.config.switchOnHit.desc": "Show the score of whoever you start fighting. When off, only kills switch the opponent.",
   "ft10.config.switchLockSeconds": "Fight lock (seconds)",
   "ft10.config.switchLockSeconds.desc": "While you traded hits with the shown opponent this recently, someone else hitting you doesn't switch the screen.",
+  "ft10.config.trustServerKills": "Trust server kill reports",
+  "ft10.config.trustServerKills.desc": "On servers with the FT10 integration (like RevoltFFA), count exactly the kills the server reports instead of working them out from chat and hits.",
   "ft10.config.usePresetPatterns": "Built-in kill message formats",
   "ft10.config.usePresetPatterns.desc": "Recognize common plugin kill messages like \"X was slain by Y\" and \"Y killed X\". Vanilla death messages always work.",
   "ft10.config.customPatterns": "Custom kill message patterns",

@@ -11,5 +11,7 @@ First version, Minecraft 26.2.
 - Settings screen (YACL) with Mod Menu integration.
 - HUD editor (`/ft hud`, settings button or hotkey): drag to move, scroll to resize, arrow keys to nudge.
 - Optional hotkeys (unbound by default): toggle FT10, toggle HUD, undo, reset opponent, settings, HUD editor.
+- Server integration (`ft10:hello` / `ft10:kill`, docs/SERVER_INTEGRATION.md): servers that report kills get exact
+  scores, including fake deaths and combat logs; FT10 stops guessing on those servers.
 - Scores saved per server.
 - English and Turkish translations.

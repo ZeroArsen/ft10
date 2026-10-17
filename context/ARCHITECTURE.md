@@ -11,13 +11,17 @@
 | `command/` | `FtCommand`: the `/ft10` and `/ft` trees (client commands). |
 | `config/` | `Ft10Config` + `ConfigManager` (config/ft10.json), `ScoreStorage` (ft10/scores.json), YACL `ConfigScreen`, `ModMenuIntegration`. |
 | `compat/` | Every call that differs between Minecraft versions. Stonecutter conditions belong here. |
-| `mixin/` | `ClientPacketListenerMixin`: damage-event and player-combat-kill packets. |
+| `mixin/` | `ClientPacketListenerMixin`: damage-event, entity-death-event and player-combat-kill packets. |
+| `net/` | `Ft10Protocol`: `ft10:hello` / `ft10:kill` payloads for server integration (`docs/SERVER_INTEGRATION.md`). |
+| `Keybinds` | Six optional hotkeys; `feedback/HudEditorScreen` is the drag-and-drop HUD editor. |
 
 ## Signal flow
 ```
 AttackEntityCallback (we swing)            ─┐
 DamageEvent packet (A hurt B, mixin)        ├─> Ft10 ──> Session.onHit / onSwing      (who is fighting whom)
 PlayerCombatKill packet (we died, mixin)    │          Session.onDeathMessage / onDeathSeen
+EntityEvent 3 packet (a player died, mixin) │
+ft10:kill payload (server says who)         │   (after ft10:hello only this one scores; the guesses above are off)
 GAME chat message (death messages)          │
 client tick: other players' health hits 0  ─┘          Session.tick → KillDetector settles pending deaths
                                                                  └─> ScoreBook.award → Notifier (title/chat/sound)
@@ -46,6 +50,8 @@ ScoreHud reads Session.book().active() every frame.
 | 1.21.5 | Hover/ClickEvent became records (`HoverEvent.ShowEntity`, `ClickEvent.RunCommand`) | `TextCompat` |
 | 1.21.6 | `HudElementRegistry` replaces `HudRenderCallback`; text colors must be ARGB | `HudCompat` |
 | 1.21.9 | authlib 7: `GameProfile` is a record (`id()`, `name()`) | `ProfileCompat` |
+| 1.21.9 | Mouse/key events became records; `KeyMapping.Category` record | `CompatScreen`, `KeyCompat` |
+| 26.x | `PayloadTypeRegistry.playS2C()` → `clientboundPlay()`; fabric-key-mapping-api | `NetCompat`, `KeyCompat` |
 | 1.21.11 | `ResourceLocation` → `Identifier` (Stonecutter string replacement) | `stonecutter.gradle.kts` |
 | 26.1 | Unobfuscated; Java 25; Loom without remapping (handled by loom-back-compat) | build |
 | 26.x | `Gui.hud` holds HUD calls, `GuiGraphicsExtractor`, `EntityTypes.PLAYER`, `ClientCommands`, `Gui.setScreen` | `HudCompat`, `TextCompat`, `ClientCompat`, `FtCommand` imports |

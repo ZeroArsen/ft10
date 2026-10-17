@@ -8,15 +8,18 @@
   scan, HUD element, title/chat/sound notifier, `/ft10` + `/ft` commands. `DeathMessagesTest` (6) covers vanilla
   translatable parsing with real Minecraft classes.
 - [x] **3. Settings** — `Ft10Config` (config/ft10.json), YACL screen, Mod Menu entrypoint, en_us + tr_tr.
-- [ ] **4. Real test** — local server + two clients (see `TESTING.md`), then a Paper server with RevoltFFA for
-  custom kill messages. **Not done yet**: the mod has only been launched to the title screen (loads cleanly).
+- [x] **4. Real test** — RCON-driven two-player run on a Fabric 26.2 server (found and fixed the instant-respawn
+  miss) and a Paper 26.2 run of the server integration (found and fixed the hello timing). See `TESTING.md`.
+- [x] **4b. Round 2 features** — HUD editor, hotkeys, server integration protocol v1, author 0Arsen.
+- [ ] **4c. RevoltFFA bridge** — `Ft10Bridge` in `C:/dev/mc-plugins/RevoltFFA` (left uncommitted for review);
+  real test needs the 1.21.11 port.
 - [ ] **5. Multi-version** — 26.3 and 26.1.2 first, then 1.21.11 down to 1.21.1. Versions per node are
   already looked up (see below).
 - [ ] **6. Release** — GitHub repo, CI publish, Modrinth project page, v1.0.0.
 
 ## Next task
-Phase 4: run `TESTING.md` on 26.2. The dedicated dev server needs `run/server/eula.txt` (the owner accepts
-the Minecraft EULA) and `online-mode=false`.
+Port to 1.21.11 (the owner's RevoltFFA server version) so the integration can be tested for real, then the
+other versions. Owner tests on public servers in the meantime.
 
 ## Dependency versions per node (Modrinth, 2026-10-17)
 | Node | Fabric API | YACL | Mod Menu |

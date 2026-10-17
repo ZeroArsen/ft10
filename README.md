@@ -15,6 +15,8 @@ announces every point with a title, a chat line and a sound, like a duel server 
 - **Saved per server.** Scores survive restarts until you reset them.
 - **Fully configurable** through Mod Menu or `/ft config`: position, size, colors, title, chat and sound. A
   drag-and-drop HUD editor (`/ft hud`) and optional hotkeys (toggle, undo, reset, settings) are included.
+- **Server integration.** Servers can report kills to FT10 through a tiny plugin channel for exact scores; see
+  [docs/SERVER_INTEGRATION.md](docs/SERVER_INTEGRATION.md).
 - **Fair play.** FT10 only shows information your client already receives. It sends nothing to the server and
   automates nothing.
 

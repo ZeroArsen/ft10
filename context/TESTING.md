@@ -27,6 +27,15 @@
 | Client restart | ✅ scores saved per server and resumed |
 | HUD next to a server action bar ("Combat: 10s") | ✅ drawn just above it, no overlap (screenshot) |
 
+## Server integration run — 2026-10-17, Paper 26.2 build 134 + test plugin (docs example code)
+| Scenario | Result |
+|---|---|
+| Join | ✅ `ft10:hello` after the fix above (first try: dropped because sent before the client registered it) |
+| Real kill (plugin report + vanilla message) | ✅ exactly one point each side |
+| `ft10test kill` without any death (fake-death server) | ✅ counted, reached VICTORY |
+| Regex kill message on a reporting server | ✅ ignored |
+| Combat log (cause 1) | ✅ counted for the other player |
+
 ## Still to check by hand
 - [ ] Kill with a bow; void/fall after a hit ("doomed to fall by").
 - [ ] Third player hits Ft10Dev mid-fight → screen stays; new opponent → 0 - 0; back → old score.
