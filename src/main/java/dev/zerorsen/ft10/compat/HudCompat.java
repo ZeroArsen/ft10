@@ -35,12 +35,18 @@ public final class HudCompat {
         void scale(float factor);
 
         void pop();
+
+        /** Solid rectangle, ARGB color. */
+        void fill(int x0, int y0, int x1, int y1, int argb);
+
+        /** One-pixel rectangle border, ARGB color. */
+        void outline(int x0, int y0, int x1, int y1, int argb);
     }
 
     /** Draws {@code renderer} right after the vanilla action bar. */
     public static void register(Identifier id, Consumer<Canvas> renderer) {
         HudElementRegistry.attachElementAfter(VanillaHudElements.OVERLAY_MESSAGE, id,
-            (graphics, deltaTracker) -> renderer.accept(new GraphicsCanvas(graphics)));
+            (graphics, deltaTracker) -> renderer.accept(canvas(graphics)));
     }
 
     public static void title(Component title, Component subtitle, int fadeIn, int stay, int fadeOut) {
@@ -48,6 +54,16 @@ public final class HudCompat {
         hud.setTimes(fadeIn, stay, fadeOut);
         hud.setSubtitle(subtitle);
         hud.setTitle(title);
+    }
+
+    /** Wraps the version's GUI graphics object (for {@link CompatScreen}). */
+    static Canvas canvas(GuiGraphicsExtractor graphics) {
+        return new GraphicsCanvas(graphics);
+    }
+
+    /** A short message in the vanilla action bar (used to confirm key presses). */
+    public static void actionBar(Component message) {
+        hud().setOverlayMessage(message, false);
     }
 
     /** Adds a line to the chat box locally. Nothing is sent to the server. */
@@ -79,5 +95,15 @@ public final class HudCompat {
         @Override public void translate(float x, float y) { graphics.pose().translate(x, y); }
         @Override public void scale(float factor) { graphics.pose().scale(factor, factor); }
         @Override public void pop() { graphics.pose().popMatrix(); }
+
+        @Override
+        public void fill(int x0, int y0, int x1, int y1, int argb) {
+            graphics.fill(x0, y0, x1, y1, argb);
+        }
+
+        @Override
+        public void outline(int x0, int y0, int x1, int y1, int argb) {
+            graphics.outline(x0, y0, x1 - x0, y1 - y0, argb);
+        }
     }
 }

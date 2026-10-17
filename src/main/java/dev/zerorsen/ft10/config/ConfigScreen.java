@@ -1,5 +1,6 @@
 package dev.zerorsen.ft10.config;
 
+import dev.isxander.yacl3.api.ButtonOption;
 import dev.isxander.yacl3.api.ConfigCategory;
 import dev.isxander.yacl3.api.ListOption;
 import dev.isxander.yacl3.api.Option;
@@ -14,12 +15,15 @@ import dev.isxander.yacl3.api.controller.IntegerSliderControllerBuilder;
 import dev.isxander.yacl3.api.controller.StringControllerBuilder;
 import dev.isxander.yacl3.api.controller.TickBoxControllerBuilder;
 import dev.zerorsen.ft10.Ft10;
+import dev.zerorsen.ft10.compat.ClientCompat;
 import dev.zerorsen.ft10.core.DeathMessageParser;
+import dev.zerorsen.ft10.feedback.HudEditorScreen;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
@@ -50,6 +54,12 @@ public final class ConfigScreen {
                 .name(text("category.hud"))
                 .group(OptionGroup.createBuilder()
                     .name(text("group.hud"))
+                    .option(ButtonOption.createBuilder()
+                        .name(text("editHud"))
+                        .description(describe("editHud"))
+                        .text(text("editHud.button"))
+                        .action(screen -> ClientCompat.setScreen(Minecraft.getInstance(), new HudEditorScreen(screen)))
+                        .build())
                     .option(bool("hudEnabled", d.hudEnabled, () -> c.hudEnabled, v -> c.hudEnabled = v))
                     .option(Option.<Ft10Config.HudVisibility>createBuilder()
                         .name(text("hudVisibility"))

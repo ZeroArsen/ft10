@@ -33,5 +33,9 @@
 - [ ] `/ft undo` and the chat [Undo] button.
 - [ ] `/ft lock`, `/ft unlock`, `/ft list`, `/ft reset`, `/ft reset all` (+ confirm), `/ft set 4 7`, `/ft off|on`.
 - [ ] `/ft config` and Mod Menu → settings screen; color/scale/offset changes show on the HUD.
+- [ ] HUD editor (`/ft hud`, settings button, hotkey): **drag with the real mouse** (synthetic input can't test it:
+      Minecraft ignores drags while the window is unfocused). Opening via `/ft hud`, scroll resize, arrow keys and
+      Esc-to-save were checked by script on 2026-10-17; R, Reset and Cancel were not.
+- [ ] Hotkeys in Options → Controls → FT10: toggle, HUD, undo, reset, settings, editor.
 - [ ] F1 hides the HUD. Turkish client language → Turkish texts.
 - [ ] Public FFA servers with plugin kill messages (owner).

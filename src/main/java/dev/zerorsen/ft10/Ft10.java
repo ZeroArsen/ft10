@@ -104,6 +104,7 @@ public final class Ft10 {
     }
 
     void onTick(Minecraft minecraft) {
+        Keybinds.tick(minecraft);
         if (pendingScreen != null) {
             ClientCompat.setScreen(minecraft, pendingScreen);
             pendingScreen = null;

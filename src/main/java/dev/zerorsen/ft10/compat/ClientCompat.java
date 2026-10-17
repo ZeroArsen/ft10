@@ -11,4 +11,8 @@ public final class ClientCompat {
     public static void setScreen(Minecraft minecraft, Screen screen) {
         minecraft.gui.setScreen(screen);
     }
+
+    public static Screen screen(Minecraft minecraft) {
+        return minecraft.gui.screen();
+    }
 }

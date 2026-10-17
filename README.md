@@ -13,7 +13,8 @@ announces every point with a title, a chat line and a sound, like a duel server 
 - **Works on vanilla and plugin servers.** Reads vanilla death messages, recent hits, and common kill-message
   formats; you can add your own server's format as a regex.
 - **Saved per server.** Scores survive restarts until you reset them.
-- **Fully configurable** through Mod Menu or `/ft config`: position, size, colors, title, chat and sound.
+- **Fully configurable** through Mod Menu or `/ft config`: position, size, colors, title, chat and sound. A
+  drag-and-drop HUD editor (`/ft hud`) and optional hotkeys (toggle, undo, reset, settings) are included.
 - **Fair play.** FT10 only shows information your client already receives. It sends nothing to the server and
   automates nothing.
 
@@ -30,6 +31,7 @@ announces every point with a title, a chat line and a sound, like a duel server 
 | `/ft goal <n>` · `goal off` | Play first to N |
 | `/ft lock <player>` · `unlock` | Keep one opponent on screen |
 | `/ft list` | Every score on this server |
+| `/ft hud` | Drag the score where you want it, scroll to resize |
 | `/ft config` | Open the settings |
 
 ## How kills are detected

@@ -16,6 +16,7 @@ import dev.zerorsen.ft10.core.PlayerRef;
 import dev.zerorsen.ft10.core.Rivalry;
 import dev.zerorsen.ft10.core.ScoreBook;
 import dev.zerorsen.ft10.core.Session;
+import dev.zerorsen.ft10.feedback.HudEditorScreen;
 import dev.zerorsen.ft10.feedback.Texts;
 import dev.zerorsen.ft10.mc.Players;
 import java.util.LinkedHashSet;
@@ -48,14 +49,14 @@ public final class FtCommand {
             .then(literal("on").executes(ctx -> setEnabled(ctx, true)))
             .then(literal("off").executes(ctx -> setEnabled(ctx, false)))
             .then(literal("toggle").executes(ctx -> setEnabled(ctx, !Ft10.get().config().enabled)))
+            // "all" is a value of the player argument (not a literal) so Brigadier sees no ambiguity.
             .then(literal("reset")
                 .executes(FtCommand::resetActive)
-                .then(literal("all")
-                    .executes(ctx -> askResetAll(ctx, root))
-                    .then(literal("confirm").executes(FtCommand::resetAll)))
                 .then(argument("player", StringArgumentType.word())
-                    .suggests(KNOWN_PLAYERS)
-                    .executes(ctx -> resetPlayer(ctx, StringArgumentType.getString(ctx, "player")))))
+                    .suggests(RESET_TARGETS)
+                    .executes(ctx -> resetTarget(ctx, root, StringArgumentType.getString(ctx, "player"), false))
+                    .then(literal("confirm")
+                        .executes(ctx -> resetTarget(ctx, root, StringArgumentType.getString(ctx, "player"), true)))))
             .then(literal("set")
                 .then(argument("me", IntegerArgumentType.integer(0, 999))
                     .then(argument("them", IntegerArgumentType.integer(0, 999))
@@ -72,12 +73,21 @@ public final class FtCommand {
                     .executes(ctx -> lock(ctx, StringArgumentType.getString(ctx, "player")))))
             .then(literal("unlock").executes(FtCommand::unlock))
             .then(literal("list").executes(FtCommand::list))
+            .then(literal("hud").executes(FtCommand::hud))
             .then(literal("config").executes(FtCommand::config));
     }
 
     /** Online players plus everyone we have a score with on this server. */
     private static final SuggestionProvider<FabricClientCommandSource> KNOWN_PLAYERS = (ctx, builder) -> {
         Set<String> names = new LinkedHashSet<>(Players.onlineNames());
+        Ft10.get().session().ifPresent(s -> s.book().byLastFought().forEach(r -> names.add(r.name())));
+        return SharedSuggestionProvider.suggest(names, builder);
+    };
+
+    /** Like {@link #KNOWN_PLAYERS}, plus "all". */
+    private static final SuggestionProvider<FabricClientCommandSource> RESET_TARGETS = (ctx, builder) -> {
+        Set<String> names = new LinkedHashSet<>(List.of("all"));
+        names.addAll(Players.onlineNames());
         Ft10.get().session().ifPresent(s -> s.book().byLastFought().forEach(r -> names.add(r.name())));
         return SharedSuggestionProvider.suggest(names, builder);
     };
@@ -118,6 +128,7 @@ public final class FtCommand {
         helpLine(ctx, root, " goal <n | off>", "ft10.help.goal");
         helpLine(ctx, root, " lock <player> | unlock", "ft10.help.lock");
         helpLine(ctx, root, " list", "ft10.help.list");
+        helpLine(ctx, root, " hud", "ft10.help.hud");
         helpLine(ctx, root, " config", "ft10.help.config");
         return OK;
     }
@@ -145,6 +156,12 @@ public final class FtCommand {
         book.get().reset(active.get().key());
         feedback(ctx, Texts.body("ft10.reset.one", Texts.value(active.get().name())));
         return OK;
+    }
+
+    private static int resetTarget(CommandContext<FabricClientCommandSource> ctx, String root, String target,
+                                   boolean confirmed) {
+        if (!target.equalsIgnoreCase("all")) return resetPlayer(ctx, target);
+        return confirmed ? resetAll(ctx) : askResetAll(ctx, root);
     }
 
     private static int resetPlayer(CommandContext<FabricClientCommandSource> ctx, String name) {
@@ -256,6 +273,11 @@ public final class FtCommand {
 
     private static int config(CommandContext<FabricClientCommandSource> ctx) {
         Ft10.get().openScreenNextTick(ConfigScreen.create(null));
+        return OK;
+    }
+
+    private static int hud(CommandContext<FabricClientCommandSource> ctx) {
+        Ft10.get().openScreenNextTick(new HudEditorScreen(null));
         return OK;
     }
 

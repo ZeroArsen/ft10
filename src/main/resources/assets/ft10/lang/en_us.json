@@ -11,6 +11,22 @@
   "ft10.chat.set_lost": "You lost %s against %s.",
   "ft10.sets": "Sets %s",
   "ft10.hud.vs": "vs %s",
+  "ft10.action.hud_shown": "Score HUD shown",
+  "ft10.action.hud_hidden": "Score HUD hidden",
+
+  "ft10.editor.title": "Edit FT10 HUD",
+  "ft10.editor.help": "Drag to move · Scroll to resize · Arrows nudge (Shift: 10 px) · R resets",
+  "ft10.editor.done": "Done",
+  "ft10.editor.reset": "Reset",
+  "ft10.editor.cancel": "Cancel",
+
+  "key.category.ft10.main": "FT10",
+  "key.ft10.toggle": "Turn FT10 on/off",
+  "key.ft10.toggle_hud": "Show/hide score HUD",
+  "key.ft10.undo": "Undo last point",
+  "key.ft10.reset": "Reset current opponent",
+  "key.ft10.settings": "Open settings",
+  "key.ft10.edit_hud": "Edit HUD position",
 
   "ft10.state.enabled": "● Enabled",
   "ft10.state.disabled": "● Disabled",
@@ -28,6 +44,7 @@
   "ft10.help.goal": "play first to N (VICTORY / DEFEAT at N)",
   "ft10.help.lock": "keep one opponent on screen",
   "ft10.help.list": "everyone you have a score with here",
+  "ft10.help.hud": "move and resize the score HUD",
   "ft10.help.config": "open the settings",
 
   "ft10.error.no_opponent": "There is no current opponent. Hit someone first.",
@@ -75,6 +92,9 @@
   "ft10.config.shortAlias": "Short /ft command",
   "ft10.config.shortAlias.desc": "Also register /ft. Turn off if a server has its own /ft command. /ft10 always works. Applies when you rejoin.",
 
+  "ft10.config.editHud": "HUD position",
+  "ft10.config.editHud.desc": "Drag the score where you want it and scroll to resize. Also: /ft hud.",
+  "ft10.config.editHud.button": "Edit",
   "ft10.config.hudEnabled": "Show score",
   "ft10.config.hudEnabled.desc": "Show the score above the action bar.",
   "ft10.config.hudVisibility": "When to show",

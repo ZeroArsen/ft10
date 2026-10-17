@@ -11,6 +11,22 @@
   "ft10.chat.set_lost": "%s maçını %s karşısında kaybettin.",
   "ft10.sets": "Setler %s",
   "ft10.hud.vs": "vs %s",
+  "ft10.action.hud_shown": "Skor HUD gösteriliyor",
+  "ft10.action.hud_hidden": "Skor HUD gizlendi",
+
+  "ft10.editor.title": "FT10 HUD Düzenle",
+  "ft10.editor.help": "Taşımak için sürükle · Boyut için tekerlek · Ok tuşları kaydırır (Shift: 10 px) · R sıfırlar",
+  "ft10.editor.done": "Tamam",
+  "ft10.editor.reset": "Sıfırla",
+  "ft10.editor.cancel": "İptal",
+
+  "key.category.ft10.main": "FT10",
+  "key.ft10.toggle": "FT10 aç/kapa",
+  "key.ft10.toggle_hud": "Skor HUD göster/gizle",
+  "key.ft10.undo": "Son puanı geri al",
+  "key.ft10.reset": "Şu anki rakibi sıfırla",
+  "key.ft10.settings": "Ayarları aç",
+  "key.ft10.edit_hud": "HUD konumunu düzenle",
 
   "ft10.state.enabled": "● Açık",
   "ft10.state.disabled": "● Kapalı",
@@ -28,6 +44,7 @@
   "ft10.help.goal": "N'e ilk ulaşan kazanır (N'de ZAFER / YENİLGİ)",
   "ft10.help.lock": "ekranda tek bir rakibi tut",
   "ft10.help.list": "bu sunucuda skorun olan herkes",
+  "ft10.help.hud": "skor HUD'unu taşı ve boyutlandır",
   "ft10.help.config": "ayarları aç",
 
   "ft10.error.no_opponent": "Şu an bir rakip yok. Önce birine vur.",
@@ -75,6 +92,9 @@
   "ft10.config.shortAlias": "Kısa /ft komutu",
   "ft10.config.shortAlias.desc": "/ft komutunu da ekle. Sunucunun kendi /ft komutu varsa kapat. /ft10 her zaman çalışır. Sunucuya yeniden girince uygulanır.",
 
+  "ft10.config.editHud": "HUD konumu",
+  "ft10.config.editHud.desc": "Skoru istediğin yere sürükle, tekerlekle boyutlandır. Ayrıca: /ft hud.",
+  "ft10.config.editHud.button": "Düzenle",
   "ft10.config.hudEnabled": "Skoru göster",
   "ft10.config.hudEnabled.desc": "Skoru action bar'ın üstünde göster.",
   "ft10.config.hudVisibility": "Ne zaman gösterilsin",

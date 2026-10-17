@@ -38,6 +38,7 @@ public final class Ft10Client implements ClientModInitializer {
         });
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, context) -> FtCommand.register(dispatcher));
         HudCompat.register(Identifier.fromNamespaceAndPath(MOD_ID, "score"), ScoreHud::render);
+        Keybinds.register();
 
         LOGGER.info("FT10 {} loaded for Minecraft {}", VERSION, MINECRAFT);
     }
