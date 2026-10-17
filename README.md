@@ -52,12 +52,6 @@ Fabric. Planned range is Minecraft **1.21 – 26.3** (one jar per version range)
 [Fabric API](https://modrinth.com/mod/fabric-api) and [YACL](https://modrinth.com/mod/yacl);
 [Mod Menu](https://modrinth.com/mod/modmenu) is optional.
 
-## Türkçe
-FT10, FFA ve duel sunucularında savaştığın rakibe karşı skoru tutan, sadece client tarafında çalışan bir Fabric
-modudur. Her rakibin skoru ayrı tutulur ve action bar'ın üstünde `4 - 7` şeklinde gösterilir. Her puanda title,
-chat mesajı ve ses gelir. `/ft goal 10` ile FT10 oynanır. Komutların hepsi `/ft help` altında; ayarlar Mod Menu
-veya `/ft config` ile açılır. Mod sunucuya hiçbir şey göndermez, sadece client'ın zaten gördüğü bilgiyi kullanır.
-
 ## Building
 ```
 ./gradlew build               # builds and tests every version: versions/<version>/build/libs/
