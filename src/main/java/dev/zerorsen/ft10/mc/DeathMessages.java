@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.contents.TranslatableContents;
 
@@ -33,9 +34,15 @@ public final class DeathMessages {
      * @param recentOpponent someone we just fought, by name: lets a kill count even when that player already left
      *                       the tab list or the server hides it
      * @param fighting       whether we just fought this player; broad patterns only count against them
+     * @param opponent       who we are fighting right now, for duel messages that only name the winner
      */
     public record Context(PlayerRef self, Function<String, Optional<PlayerRef>> recentOpponent,
-                          Function<PlayerRef, Boolean> fighting) {
+                          Function<PlayerRef, Boolean> fighting, Supplier<Optional<PlayerRef>> opponent) {
+        public Context(PlayerRef self, Function<String, Optional<PlayerRef>> recentOpponent,
+                       Function<PlayerRef, Boolean> fighting) {
+            this(self, recentOpponent, fighting, Optional::empty);
+        }
+
         public static Context of(PlayerRef self) {
             return new Context(self, name -> Optional.empty(), player -> false);
         }
@@ -93,6 +100,11 @@ public final class DeathMessages {
     private static Optional<Death> fromParsed(DeathMessageParser.Parsed parsed, Component message, Context context) {
         List<TextCompat.HoverEntity> hovers = hoveredPlayers(message);
         PlayerRef self = context.self();
+        if (parsed.winner() != null) return fromWinner(parsed, hovers, context);
+        if (DeathMessageParser.OPPONENT.equals(parsed.victim())) {
+            // "Round Won": whoever we're fighting just lost to us.
+            return context.opponent().get().map(o -> new Death(o, self, true, parsed.label()));
+        }
         PlayerRef victim = resolve(parsed.victim(), hovers, context).orElse(null);
         PlayerRef killer = parsed.killer() == null ? null : resolve(parsed.killer(), hovers, context).orElse(null);
 
@@ -113,6 +125,23 @@ public final class DeathMessages {
         // A named killer we couldn't find is someone else, not "unknown": don't fall back to our hits.
         boolean killerKnown = parsed.killer() != null;
         return Optional.of(new Death(victim, killer, killerKnown, parsed.label()));
+    }
+
+    /**
+     * "Steve won the round": a duel between us and our current opponent ended. If we won, the opponent died to us;
+     * if the opponent won, we died to them. Anyone else winning (a duel we only watch) is not about us.
+     */
+    private static Optional<Death> fromWinner(DeathMessageParser.Parsed parsed, List<TextCompat.HoverEntity> hovers,
+                                              Context context) {
+        PlayerRef self = context.self();
+        Optional<PlayerRef> winner = resolve(parsed.winner(), hovers, context)
+            .or(() -> context.recentOpponent().apply(parsed.winner()));
+        if (winner.isEmpty()) return Optional.empty();
+        if (self.sameAs(winner.get())) {
+            return context.opponent().get().map(o -> new Death(o, self, true, parsed.label()));
+        }
+        if (!context.fighting().apply(winner.get())) return Optional.empty();
+        return Optional.of(new Death(self, winner.get(), true, parsed.label()));
     }
 
     private static Optional<PlayerRef> resolve(String name, List<TextCompat.HoverEntity> hovers, Context context) {

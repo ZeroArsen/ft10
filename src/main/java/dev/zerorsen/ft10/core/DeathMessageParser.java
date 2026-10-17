@@ -14,10 +14,15 @@ import java.util.regex.PatternSyntaxException;
  * {@code killer} group is about the player themself dying ("You were slain by {killer}"); one with only a
  * {@code victim} group leaves the killer open, and the hit history decides. Players can write regexes or simple
  * templates like {@code {victim} was slain by {killer}} ({@code *} matches anything).
+ *
+ * <p>Duel servers often only name the round's winner ("Steve won the round 1 - 0"): a {@code winner} group means
+ * "the fight between the player and their current opponent ended, and this one won".
  */
 public final class DeathMessageParser {
     /** Stands for the player themself in {@link Parsed}; never a valid Minecraft name. */
     public static final String SELF = "<self>";
+    /** Stands for the opponent the player is fighting right now ("Round Won"). */
+    public static final String OPPONENT = "<opponent>";
 
     /** A Minecraft name, optionally with the "." or "*" prefix Bedrock players get through Geyser. */
     private static final String NAME = "[.*]?\\w{1,16}";
@@ -28,6 +33,7 @@ public final class DeathMessageParser {
     private static final String START = "^[^\\w.*\\[]*(?:\\[[^\\]]{1,24}\\]\\s*[^\\w.*]*)?";
     private static final String VICTIM = "(?<victim>" + NAME + ")";
     private static final String KILLER = "(?<killer>" + NAME + ")";
+    private static final String WINNER = "(?<winner>" + NAME + ")";
     private static final String KILL_VERB = "(?:killed|slain|slew|eliminated|destroyed|murdered|finished off"
         + "|obliterated|defeated|executed|wrecked|annihilated|knocked out|took out)";
     private static final String PASSIVE_VERB = "(?:slain|killed|murdered|destroyed|eliminated|executed|shot"
@@ -42,7 +48,11 @@ public final class DeathMessageParser {
         + "(?:[\\p{L}'-]+ ){0,4}[\\p{L}'-]+";
     private static final String YOU = "(?:you|u)";
 
-    private enum Self { NONE, VICTIM, KILLER }
+    /**
+     * Which side a preset leaves implicit: the player is the victim or the killer, the current opponent died to
+     * the player ("Round Won"), or the player died to whoever hit them last ("You Died").
+     */
+    private enum Self { NONE, VICTIM, KILLER, OPPONENT_DIED, SELF_DIED }
 
     /** @param loose matches broadly; only trusted when the other player is someone we were just fighting */
     private record Entry(String label, Pattern pattern, Self self, boolean loose) {}
@@ -62,16 +72,22 @@ public final class DeathMessageParser {
         preset("killed", START + KILLER + " (?:has |just )?" + KILL_VERB + " " + VICTIM + "\\b", Self.NONE),
         preset("died-to", START + VICTIM + " (?:died to|lost to|fell to) " + KILLER + "\\b", Self.NONE),
         preset("was-by", START + VICTIM + " (?:was|has been|got) " + ANY_WORDS + " by " + KILLER + "\\b",
-            Self.NONE, true)
+            Self.NONE, true),
+        // Duel servers: the round's winner, or a title for each side.
+        preset("won-the-round", START + WINNER + " (?:has )?(?:won|wins) the (?:round|duel|match|fight)\\b", Self.NONE),
+        preset("round-won-by", START + "(?:round|duel|match) won by " + WINNER + "\\b", Self.NONE),
+        preset("round-won-title", START + "(?:round won|you won the round)\\b", Self.OPPONENT_DIED),
+        preset("you-died-title", START + "you died\\b(?!\\s+(?:to|by)\\b)", Self.SELF_DIED)
     );
 
     /**
-     * @param victim a name, or {@link #SELF}
+     * @param victim a name, {@link #SELF} or {@link #OPPONENT}; null when only the winner is known
      * @param killer a name, {@link #SELF}, or null when the message names no killer
+     * @param winner the winner of a duel round, or null; then victim and killer are null
      * @param label  which pattern matched (a preset name, or "custom #n"), for debug output
      * @param loose  a broad pattern: count it only when the other player is a current opponent
      */
-    public record Parsed(String victim, String killer, String label, boolean loose) {}
+    public record Parsed(String victim, String killer, String winner, String label, boolean loose) {}
 
     private final List<Entry> patterns = new ArrayList<>();
     private final List<String> errors = new ArrayList<>();
@@ -92,13 +108,21 @@ public final class DeathMessageParser {
         for (Entry entry : patterns) {
             Matcher m = entry.pattern().matcher(plain);
             if (!m.find()) continue;
+            String winner = group(m, entry.pattern(), "winner");
+            if (winner != null) return Optional.of(new Parsed(null, null, winner, entry.label(), entry.loose()));
+            if (entry.self() == Self.OPPONENT_DIED) {
+                return Optional.of(new Parsed(OPPONENT, SELF, null, entry.label(), entry.loose()));
+            }
+            if (entry.self() == Self.SELF_DIED) {
+                return Optional.of(new Parsed(SELF, null, null, entry.label(), entry.loose()));
+            }
             String victim = group(m, entry.pattern(), "victim");
             String killer = group(m, entry.pattern(), "killer");
             if (entry.self() == Self.VICTIM || victim == null) victim = SELF;
             if (entry.self() == Self.KILLER) killer = SELF;
             if (victim.equals(SELF) && killer == null) continue; // matched nothing useful
             if (killer != null && killer.equalsIgnoreCase(victim)) killer = null;
-            return Optional.of(new Parsed(victim, killer, entry.label(), entry.loose()));
+            return Optional.of(new Parsed(victim, killer, null, entry.label(), entry.loose()));
         }
         return Optional.empty();
     }
@@ -112,17 +136,20 @@ public final class DeathMessageParser {
     public static String validate(String pattern) {
         try {
             Pattern compiled = compile(pattern);
-            return hasGroup(compiled, "victim") || hasGroup(compiled, "killer")
+            return hasGroup(compiled, "victim") || hasGroup(compiled, "killer") || hasGroup(compiled, "winner")
                 ? null
-                : isTemplate(pattern) ? "needs {victim} or {killer}" : "needs a (?<victim>...) or (?<killer>...) group";
+                : isTemplate(pattern)
+                    ? "needs {victim}, {killer} or {winner}"
+                    : "needs a (?<victim>...), (?<killer>...) or (?<winner>...) group";
         } catch (PatternSyntaxException e) {
             return e.getDescription();
         }
     }
 
-    /** A template uses {victim}/{killer} placeholders; anything with a named regex group is a regex. */
+    /** A template uses {victim}/{killer}/{winner} placeholders; anything with a named regex group is a regex. */
     static boolean isTemplate(String pattern) {
-        return !pattern.contains("(?<") && (pattern.contains("{victim}") || pattern.contains("{killer}"));
+        return !pattern.contains("(?<")
+            && (pattern.contains("{victim}") || pattern.contains("{killer}") || pattern.contains("{winner}"));
     }
 
     /** "{victim} was slain by {killer}" → an anchored, case-insensitive regex; "*" matches anything. */
@@ -131,10 +158,15 @@ public final class DeathMessageParser {
         StringBuilder literal = new StringBuilder();
         int i = 0;
         while (i < template.length()) {
-            if (template.startsWith("{victim}", i) || template.startsWith("{killer}", i)) {
+            String placeholder = placeholderAt(template, i);
+            if (placeholder != null) {
                 flush(regex, literal);
-                regex.append(template.startsWith("{victim}", i) ? VICTIM : KILLER);
-                i += 8;
+                regex.append(switch (placeholder) {
+                    case "{victim}" -> VICTIM;
+                    case "{killer}" -> KILLER;
+                    default -> WINNER;
+                });
+                i += placeholder.length();
             } else if (template.charAt(i) == '*') {
                 flush(regex, literal);
                 regex.append(".*?");
@@ -145,6 +177,13 @@ public final class DeathMessageParser {
         }
         flush(regex, literal);
         return regex.toString();
+    }
+
+    private static String placeholderAt(String template, int i) {
+        for (String placeholder : List.of("{victim}", "{killer}", "{winner}")) {
+            if (template.startsWith(placeholder, i)) return placeholder;
+        }
+        return null;
     }
 
     private static void flush(StringBuilder regex, StringBuilder literal) {

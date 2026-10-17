@@ -118,6 +118,14 @@ public final class Session {
         return other != null && tracker.recentlyFought(other.key(), now, rules.get().combatWindowMs());
     }
 
+    /**
+     * The player we fought most recently in the last minute: in a duel, the opponent. Duel messages that only name
+     * the round's winner ("Round Won") are about this player.
+     */
+    public Optional<PlayerRef> currentOpponent(long now) {
+        return tracker.recentOpponents(now, 60_000).stream().findFirst();
+    }
+
     /** Names of everyone we fought in the last minute, for spotting kill messages FT10 doesn't understand. */
     public List<PlayerRef> recentOpponents(long now) {
         return tracker.recentOpponents(now, 60_000);

@@ -265,6 +265,19 @@ class SessionTest {
     }
 
     @Test
+    void fakeDeathAndRoundMessageCountOnce() {
+        // Duel server: the loser is switched to spectator (a death we only see), then "Me won the round".
+        session.onHit(ME, ALEX, now);
+        session.onDeathSeen(ALEX, now + 100);
+        assertTrue(session.currentOpponent(now + 120).orElseThrow().sameAs(ALEX));
+        session.onDeathMessage(ALEX, ME, now + 150);
+        session.tick(now + 5_000);
+        assertScore(ALEX, 1, 0);
+        assertEquals(1, updates.size());
+        assertTrue(session.currentOpponent(now + 5_000).isEmpty(), "the finished fight is forgotten");
+    }
+
+    @Test
     void killCounterIgnoresPlayersWhoOnlyHitUs() {
         session.onHit(ALEX, ME, now);
         assertTrue(session.onKillCounted(now + 100).isEmpty());

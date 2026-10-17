@@ -19,8 +19,10 @@ import dev.zerorsen.ft10.mc.Players;
 import dev.zerorsen.ft10.mc.ServerKey;
 import dev.zerorsen.ft10.mc.Sidebar;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -30,8 +32,10 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundEntityEventPacket;
+import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.GameType;
 
 /**
  * The mod's runtime: owns the config, the stored scores and the {@link Session} of the current connection, and
@@ -62,6 +66,8 @@ public final class Ft10 {
     private DeathMessageParser parser;
     private Session session;
     private final Set<UUID> deadPlayers = new HashSet<>();
+    /** Last known game mode per player (tab list), to spot switches to spectator. */
+    private final Map<UUID, GameType> gameModes = new HashMap<>();
     private Screen pendingScreen;
     private Component lastSubtitle;
     private long lastSubtitleAt;
@@ -107,6 +113,11 @@ public final class Ft10 {
         return debug;
     }
 
+    /** Deletes every score on every server (settings button); returns how many. */
+    public int resetAllScores() {
+        return storage.resetEverything(config().saveScores);
+    }
+
     /** Opens a screen on the next tick (opening it from a chat command would be closed with the chat). */
     public void openScreenNextTick(Screen screen) {
         pendingScreen = screen;
@@ -128,6 +139,8 @@ public final class Ft10 {
         storage.flush(config().saveScores);
         session = null;
         resetSignals();
+        // Only here, not on join: the tab list (with everyone's game mode) can arrive before the JOIN event.
+        gameModes.clear();
     }
 
     void onStopping() {
@@ -226,8 +239,37 @@ public final class Ft10 {
         read(subtitle, SUBTITLE, now, false); // unrecognized subtitles are logged with their title
     }
 
+    /**
+     * Tab list updates. Duel servers often fake a death by switching the loser to spectator, with no death packet
+     * at all: a switch to spectator by us, or by someone we're fighting, is a death we saw.
+     */
+    public void onPlayerInfoUpdate(ClientboundPlayerInfoUpdatePacket packet) {
+        if (!packet.actions().contains(ClientboundPlayerInfoUpdatePacket.Action.UPDATE_GAME_MODE)) return;
+        long now = System.currentTimeMillis();
+        for (ClientboundPlayerInfoUpdatePacket.Entry entry : packet.entries()) {
+            GameType before = gameModes.put(entry.profileId(), entry.gameMode());
+            if (!tracking() || before == null || before == GameType.SPECTATOR) continue;
+            if (entry.gameMode() != GameType.SPECTATOR) continue;
+            PlayerRef self = session.self();
+            Optional<PlayerRef> player = Players.byUuid(entry.profileId());
+            if (isSelf(entry.profileId()) || player.map(self::sameAs).orElse(false)) {
+                deathSeen(self, "ft10.debug.source.spectator", now);
+                continue;
+            }
+            player.filter(p -> session.fighting(p, now))
+                .ifPresent(p -> deathSeen(p, "ft10.debug.source.spectator", now));
+        }
+    }
+
+    /** The session's own ref can lack a UUID (the player entity may not exist yet on JOIN), so ask the client too. */
+    private boolean isSelf(UUID id) {
+        Minecraft minecraft = Minecraft.getInstance();
+        return id.equals(session.self().uuid()) || (minecraft.player != null && id.equals(minecraft.player.getUUID()));
+    }
+
     /** Players left the tab list; with "count combat logs" on, leaving mid-fight is our kill. */
     public void onPlayersLeft(List<UUID> ids) {
+        ids.forEach(gameModes::remove);
         if (!tracking()) return;
         long now = System.currentTimeMillis();
         for (UUID id : ids) {
@@ -320,7 +362,8 @@ public final class Ft10 {
 
     private DeathMessages.Context context(long now) {
         Session s = session;
-        return new DeathMessages.Context(s.self(), name -> s.recentOpponent(name, now), p -> s.fighting(p, now));
+        return new DeathMessages.Context(s.self(), name -> s.recentOpponent(name, now), p -> s.fighting(p, now),
+            () -> s.currentOpponent(now));
     }
 
     private boolean tracking() {

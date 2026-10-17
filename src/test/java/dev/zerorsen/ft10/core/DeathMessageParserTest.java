@@ -40,6 +40,35 @@ class DeathMessageParserTest {
     }
 
     @Test
+    void duelMessagesNameTheWinner() {
+        assertWinner("BarutAlemdar won the round 0 - 1", "BarutAlemdar");
+        assertWinner("Steve wins the round!", "Steve");
+        assertWinner("» Steve has won the duel", "Steve");
+        assertWinner("Round won by Steve", "Steve");
+        assertTrue(presets.parse("Alex: Steve won the round lol").isEmpty());
+    }
+
+    @Test
+    void roundTitles() {
+        DeathMessageParser.Parsed won = presets.parse("Round Won 1 - 0").orElseThrow();
+        assertEquals(DeathMessageParser.OPPONENT, won.victim());
+        assertEquals(SELF, won.killer());
+
+        DeathMessageParser.Parsed died = presets.parse("You Died 0 - 1").orElseThrow();
+        assertEquals(SELF, died.victim());
+        assertNull(died.killer(), "the killer comes from the hits");
+
+        assertParsed("You died to Alex", SELF, "Alex"); // still the named form
+    }
+
+    @Test
+    void winnerTemplate() {
+        DeathMessageParser parser = new DeathMessageParser(false, List.of("{winner} won the round *"));
+        assertEquals("Steve", parser.parse("Steve won the round 2 - 1").orElseThrow().winner());
+        assertNull(DeathMessageParser.validate("{winner} took the round"));
+    }
+
+    @Test
     void broadPatternsAreMarkedLoose() {
         DeathMessageParser.Parsed thrown = assertParsed("Steve was thrown into the void by Alex", "Steve", "Alex");
         assertTrue(thrown.loose());
@@ -110,6 +139,13 @@ class DeathMessageParserTest {
         assertTrue(regex.startsWith("^"));
         assertTrue(DeathMessageParser.isTemplate("{victim} died *"));
         assertFalse(DeathMessageParser.isTemplate("(?<victim>\\w+) {victim}"));
+    }
+
+    private void assertWinner(String message, String winner) {
+        DeathMessageParser.Parsed parsed = presets.parse(message).orElse(null);
+        assertNotNull(parsed, "no match: " + message);
+        assertEquals(winner, parsed.winner(), message);
+        assertNull(parsed.victim(), message);
     }
 
     private DeathMessageParser.Parsed assertParsed(String message, String victim, String killer) {

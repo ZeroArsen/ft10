@@ -10,7 +10,6 @@
   "ft10.chat.set_won": "You won %s against %s!",
   "ft10.chat.set_lost": "You lost %s against %s.",
   "ft10.sets": "Sets %s",
-  "ft10.hud.vs": "vs %s",
   "ft10.action.hud_shown": "Score HUD shown",
   "ft10.action.hud_hidden": "Score HUD hidden",
 
@@ -91,6 +90,16 @@
   "ft10.config.saveScores.desc": "Keep scores (per server) after you leave or close the game.",
   "ft10.config.shortAlias": "Short /ft command",
   "ft10.config.shortAlias.desc": "Also register /ft. Turn off if a server has its own /ft command. /ft10 always works. Applies when you rejoin.",
+  "ft10.config.resetServer": "Reset scores on this server",
+  "ft10.config.resetServer.desc": "Delete every score on the server you are playing on. Same as /ft reset all.",
+  "ft10.config.resetServer.button": "Reset",
+  "ft10.config.resetServer.confirm": "Reset every score on this server?",
+  "ft10.config.resetServer.confirm.message": "All scores and sets against every opponent on this server are deleted. This can't be undone.",
+  "ft10.config.resetEverything": "Reset all scores",
+  "ft10.config.resetEverything.desc": "Delete every score on every server you have played on.",
+  "ft10.config.resetEverything.button": "Reset all",
+  "ft10.config.resetEverything.confirm": "Reset all scores on every server?",
+  "ft10.config.resetEverything.confirm.message": "All scores and sets on every server are deleted. This can't be undone.",
 
   "ft10.config.editHud": "HUD position",
   "ft10.config.editHud.desc": "Drag the score where you want it and scroll to resize. Also: /ft hud.",
@@ -112,7 +121,7 @@
   "ft10.config.hudShadow": "Text shadow",
   "ft10.config.hudShadow.desc": "Draw the score with a shadow.",
   "ft10.config.hudShowName": "Show opponent name",
-  "ft10.config.hudShowName.desc": "Show \"vs Name\" above the score.",
+  "ft10.config.hudShowName.desc": "Show the opponent's name above the score.",
   "ft10.config.hudShowGoal": "Show goal",
   "ft10.config.hudShowGoal.desc": "Show FT10 and the set score when a goal is set.",
   "ft10.config.colorMe": "Your score",
@@ -121,8 +130,6 @@
   "ft10.config.colorThem.desc": "Color of your opponent's number.",
   "ft10.config.colorSeparator": "Separator",
   "ft10.config.colorSeparator.desc": "Color of the dash between the numbers.",
-  "ft10.config.colorLabel": "Label",
-  "ft10.config.colorLabel.desc": "Color of the \"vs Name\" line.",
 
   "ft10.config.titleEnabled": "Show title",
   "ft10.config.titleEnabled.desc": "Show the new score as a title when a point is scored.",
@@ -148,7 +155,7 @@
   "ft10.config.usePresetPatterns": "Built-in kill message formats",
   "ft10.config.usePresetPatterns.desc": "Recognize common plugin kill messages like \"X was slain by Y\" and \"Y killed X\". Vanilla death messages always work.",
   "ft10.config.customPatterns": "Custom kill message patterns",
-  "ft10.config.customPatterns.desc": "Your server's kill messages, as templates like \"{victim} was killed by {killer}\" (* matches anything) or as regular expressions with (?<victim>...) and (?<killer>...) groups. Without {killer} the player who hit the victim last gets the kill; without {victim} it is about you dying. Turn on /ft debug and copy a message FT10 missed to get the exact text. Invalid patterns are dropped when saving.",
+  "ft10.config.customPatterns.desc": "Your server's kill messages, as templates like \"{victim} was killed by {killer}\" (* matches anything) or as regular expressions with (?<victim>...) and (?<killer>...) groups. Without {killer} the player who hit the victim last gets the kill; without {victim} it is about you dying. For duel messages that only name the winner, use {winner} (\"{winner} won the round *\"). Turn on /ft debug and copy a message FT10 missed to get the exact text. Invalid patterns are dropped when saving.",
   "ft10.config.countCombatLogs": "Count combat logs",
   "ft10.config.countCombatLogs.desc": "An opponent who leaves the server while fighting you counts as your kill.",
   "ft10.config.useSidebarStats": "Read sidebar kill counters",
@@ -182,5 +189,6 @@
   "ft10.debug.channel.death_screen": "death screen",
   "ft10.debug.source.event": "death event",
   "ft10.debug.source.health": "health 0",
-  "ft10.debug.source.death_screen": "death screen"
+  "ft10.debug.source.death_screen": "death screen",
+  "ft10.debug.source.spectator": "switched to spectator"
 }

@@ -157,6 +157,39 @@ class DeathMessagesTest {
     }
 
     @Test
+    void roundWinnerDecidesWhoDied() {
+        PlayerRef steve = PlayerRef.of(STEVE, "Steve");
+        DeathMessages.Context duel = new DeathMessages.Context(ME,
+            n -> n.equalsIgnoreCase("Steve") ? Optional.of(steve) : Optional.empty(), p -> p.sameAs(steve),
+            () -> Optional.of(steve));
+
+        // We won: our opponent died to us.
+        DeathMessages.Death won = DeathMessages.parse(Component.literal("Me won the round 1 - 0"), PRESETS, duel)
+            .orElseThrow();
+        assertEquals(STEVE, won.victim().uuid());
+        assertEquals(ME_ID, won.killer().uuid());
+
+        // The opponent won: we died to them.
+        DeathMessages.Death lost = DeathMessages.parse(Component.literal("Steve won the round 1 - 1"), PRESETS, duel)
+            .orElseThrow();
+        assertEquals(ME_ID, lost.victim().uuid());
+        assertEquals(STEVE, lost.killer().uuid());
+
+        // A duel we only watch: nothing to do with us.
+        assertTrue(DeathMessages.parse(Component.literal("Herobrine won the round 3 - 0"), PRESETS, duel).isEmpty());
+    }
+
+    @Test
+    void roundWonTitleNeedsAnOpponent() {
+        PlayerRef steve = PlayerRef.of(STEVE, "Steve");
+        DeathMessages.Context duel = new DeathMessages.Context(ME, n -> Optional.empty(), p -> false,
+            () -> Optional.of(steve));
+        assertEquals(STEVE, DeathMessages.parse(Component.literal("Round Won"), PRESETS, duel).orElseThrow()
+            .victim().uuid());
+        assertTrue(DeathMessages.parse(Component.literal("Round Won"), PRESETS, CONTEXT).isEmpty());
+    }
+
+    @Test
     void messageWithoutKillerLeavesItToTheHits() {
         DeathMessageParser parser = new DeathMessageParser(false, List.of("{victim} fell into the void"));
         Component message = Component.literal("")

@@ -6,6 +6,7 @@ import net.minecraft.network.protocol.game.ClientboundDamageEventPacket;
 import net.minecraft.network.protocol.game.ClientboundEntityEventPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerCombatKillPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoRemovePacket;
+import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundSetActionBarTextPacket;
 import net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket;
 import net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket;
@@ -54,6 +55,12 @@ abstract class ClientPacketListenerMixin {
     @Inject(method = "setSubtitleText", at = @At("RETURN"))
     private void ft10$onSubtitle(ClientboundSetSubtitleTextPacket packet, CallbackInfo ci) {
         Ft10.get().onSubtitle(packet.text());
+    }
+
+    /** Game mode changes: duel servers fake a death by switching the loser to spectator. */
+    @Inject(method = "handlePlayerInfoUpdate", at = @At("RETURN"))
+    private void ft10$onPlayerInfoUpdate(ClientboundPlayerInfoUpdatePacket packet, CallbackInfo ci) {
+        Ft10.get().onPlayerInfoUpdate(packet);
     }
 
     @Inject(method = "handlePlayerInfoRemove", at = @At("RETURN"))

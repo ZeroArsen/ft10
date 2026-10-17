@@ -10,7 +10,6 @@
   "ft10.chat.set_won": "%s maçını %s karşısında kazandın!",
   "ft10.chat.set_lost": "%s maçını %s karşısında kaybettin.",
   "ft10.sets": "Setler %s",
-  "ft10.hud.vs": "vs %s",
   "ft10.action.hud_shown": "Skor HUD gösteriliyor",
   "ft10.action.hud_hidden": "Skor HUD gizlendi",
 
@@ -91,6 +90,16 @@
   "ft10.config.saveScores.desc": "Sunucudan çıkınca veya oyunu kapatınca skorları (sunucu başına) sakla.",
   "ft10.config.shortAlias": "Kısa /ft komutu",
   "ft10.config.shortAlias.desc": "/ft komutunu da ekle. Sunucunun kendi /ft komutu varsa kapat. /ft10 her zaman çalışır. Sunucuya yeniden girince uygulanır.",
+  "ft10.config.resetServer": "Bu sunucudaki skorları sıfırla",
+  "ft10.config.resetServer.desc": "Oynadığın sunucudaki bütün skorları sil. /ft reset all ile aynı.",
+  "ft10.config.resetServer.button": "Sıfırla",
+  "ft10.config.resetServer.confirm": "Bu sunucudaki bütün skorlar sıfırlansın mı?",
+  "ft10.config.resetServer.confirm.message": "Bu sunucudaki bütün rakiplere karşı skorlar ve setler silinir. Geri alınamaz.",
+  "ft10.config.resetEverything": "Tüm skorları sıfırla",
+  "ft10.config.resetEverything.desc": "Oynadığın bütün sunuculardaki skorları sil.",
+  "ft10.config.resetEverything.button": "Hepsini sıfırla",
+  "ft10.config.resetEverything.confirm": "Bütün sunuculardaki skorlar sıfırlansın mı?",
+  "ft10.config.resetEverything.confirm.message": "Bütün sunuculardaki skorlar ve setler silinir. Geri alınamaz.",
 
   "ft10.config.editHud": "HUD konumu",
   "ft10.config.editHud.desc": "Skoru istediğin yere sürükle, tekerlekle boyutlandır. Ayrıca: /ft hud.",
@@ -112,7 +121,7 @@
   "ft10.config.hudShadow": "Yazı gölgesi",
   "ft10.config.hudShadow.desc": "Skoru gölgeli çiz.",
   "ft10.config.hudShowName": "Rakip adını göster",
-  "ft10.config.hudShowName.desc": "Skorun üstünde \"vs İsim\" göster.",
+  "ft10.config.hudShowName.desc": "Skorun üstünde rakibin adını göster.",
   "ft10.config.hudShowGoal": "Hedefi göster",
   "ft10.config.hudShowGoal.desc": "Hedef açıkken FT10 ve set skorunu göster.",
   "ft10.config.colorMe": "Senin skorun",
@@ -121,8 +130,6 @@
   "ft10.config.colorThem.desc": "Rakibin sayısının rengi.",
   "ft10.config.colorSeparator": "Ayraç",
   "ft10.config.colorSeparator.desc": "Sayılar arasındaki çizginin rengi.",
-  "ft10.config.colorLabel": "Etiket",
-  "ft10.config.colorLabel.desc": "\"vs İsim\" satırının rengi.",
 
   "ft10.config.titleEnabled": "Title göster",
   "ft10.config.titleEnabled.desc": "Puan alınınca yeni skoru title olarak göster.",
@@ -148,7 +155,7 @@
   "ft10.config.usePresetPatterns": "Hazır kill mesajı formatları",
   "ft10.config.usePresetPatterns.desc": "\"X was slain by Y\", \"Y killed X\" gibi yaygın plugin mesajlarını tanı. Vanilla ölüm mesajları her zaman çalışır.",
   "ft10.config.customPatterns": "Özel kill mesajı kalıpları",
-  "ft10.config.customPatterns.desc": "Sunucunun kill mesajları; \"{victim} was killed by {killer}\" gibi şablon (* her şeyle eşleşir) ya da (?<victim>...) ve (?<killer>...) gruplu regex olarak. {killer} yoksa kurbana son vuran kill'i alır; {victim} yoksa mesaj senin ölümündür. Tam metni almak için /ft debug aç ve FT10'un kaçırdığı mesajı kopyala. Geçersiz kalıplar kaydederken silinir.",
+  "ft10.config.customPatterns.desc": "Sunucunun kill mesajları; \"{victim} was killed by {killer}\" gibi şablon (* her şeyle eşleşir) ya da (?<victim>...) ve (?<killer>...) gruplu regex olarak. {killer} yoksa kurbana son vuran kill'i alır; {victim} yoksa mesaj senin ölümündür. Sadece kazananı söyleyen duel mesajları için {winner} kullan (\"{winner} won the round *\"). Tam metni almak için /ft debug aç ve FT10'un kaçırdığı mesajı kopyala. Geçersiz kalıplar kaydederken silinir.",
   "ft10.config.countCombatLogs": "Combat log'u say",
   "ft10.config.countCombatLogs.desc": "Seninle savaşırken sunucudan çıkan rakip senin kill'in sayılır.",
   "ft10.config.useSidebarStats": "Sidebar kill sayaçlarını oku",
@@ -182,5 +189,6 @@
   "ft10.debug.channel.death_screen": "ölüm ekranı",
   "ft10.debug.source.event": "ölüm olayı",
   "ft10.debug.source.health": "can 0",
-  "ft10.debug.source.death_screen": "ölüm ekranı"
+  "ft10.debug.source.death_screen": "ölüm ekranı",
+  "ft10.debug.source.spectator": "spectator moduna geçti"
 }
