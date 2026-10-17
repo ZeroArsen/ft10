@@ -15,6 +15,14 @@ loomx.loom_version = "1.18-SNAPSHOT"
 #   mod.mc_releases -> versions the jar is marked compatible with on Modrinth
 #   deps.*          -> versions of the mods we compile against (looked up on Modrinth per node)
 
+["1.21.11"]
+mod.mc_compat = "1.21.11"
+mod.mc_releases = ["1.21.11"]
+
+deps.fabric_api = "0.141.6+1.21.11"
+deps.yacl = "3.8.2+1.21.11-fabric"
+deps.modmenu = "17.0.1"
+
 ["26.2"]
 mod.mc_compat = "~26.2"
 mod.mc_releases = ["26.2"]

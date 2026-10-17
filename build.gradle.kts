@@ -13,6 +13,10 @@ val requiredJava: JavaVersion = when {
     else -> JavaVersion.VERSION_21
 }
 
+// The main version (26.2) runs in run/, every other version in run/<version>/: a world or options file saved by
+// a newer Minecraft must never be opened by an older one.
+val runRoot: String = if (sc.current.version == "26.2") "run" else "run/${sc.current.version}"
+
 repositories {
     /** Restricts lookups of [groups] to one maven so dependency resolution stays fast. */
     fun strictMaven(url: String, alias: String, vararg groups: String) = exclusiveContent {
@@ -20,6 +24,7 @@ repositories {
         filter { groups.forEach(::includeGroup) }
     }
     strictMaven("https://api.modrinth.com/maven", "Modrinth", "maven.modrinth")
+    strictMaven("https://maven.quiltmc.org/repository/release", "Quilt", "org.quiltmc.parsers")
     mavenCentral()
 }
 
@@ -34,6 +39,13 @@ dependencies {
     modImplementation("maven.modrinth:yacl:${property("deps.yacl")}")
     modCompileOnly("maven.modrinth:modmenu:${property("deps.modmenu")}")
     modLocalRuntime("maven.modrinth:modmenu:${property("deps.modmenu")}")
+    if (sc.current.parsed < "26.1") {
+        // Remapping Loom drops the libraries YACL nests in its jar, and Modrinth's POM doesn't list them, so the
+        // dev client would crash without these. Players are unaffected: the real YACL jar still carries them.
+        localRuntime("org.quiltmc.parsers:json:0.2.1")
+        localRuntime("org.quiltmc.parsers:gson:0.2.1")
+        localRuntime("com.twelvemonkeys.imageio:imageio-webp:3.12.0")
+    }
 
     testImplementation(platform("org.junit:junit-bom:5.13.4"))
     testImplementation("org.junit.jupiter:junit-jupiter")
@@ -50,7 +62,7 @@ loom {
     runConfigs.all {
         preferGradleTask = true
         generateRunConfig = true
-        runDirectory = rootProject.file("run") // shared between versions
+        runDirectory = rootProject.file(runRoot)
         jvmArguments.add("-Dmixin.debug.export=true")
     }
 
@@ -73,8 +85,8 @@ loom {
 
 // Keep each run in its own folder so two clients and the server don't fight over logs/options.
 afterEvaluate {
-    loom.runConfigs.named("opponent") { runDirectory = rootProject.file("run/opponent") }
-    loom.runConfigs.named("server") { runDirectory = rootProject.file("run/server") }
+    loom.runConfigs.named("opponent") { runDirectory = rootProject.file("$runRoot/opponent") }
+    loom.runConfigs.named("server") { runDirectory = rootProject.file("$runRoot/server") }
 }
 
 java {

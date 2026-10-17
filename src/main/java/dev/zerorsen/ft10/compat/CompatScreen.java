@@ -1,6 +1,10 @@
 package dev.zerorsen.ft10.compat;
 
+//? if >=26.1 {
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+//?} else {
+/*import net.minecraft.client.gui.GuiGraphics;
+*///?}
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
@@ -34,6 +38,7 @@ public abstract class CompatScreen extends Screen {
         return minecraft.level != null;
     }
 
+    //? if >=26.1 {
     @Override
     public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         if (!showWorld()) super.extractBackground(graphics, mouseX, mouseY, partialTick);
@@ -44,6 +49,18 @@ public abstract class CompatScreen extends Screen {
         draw(HudCompat.canvas(graphics), mouseX, mouseY);
         super.extractRenderState(graphics, mouseX, mouseY, partialTick);
     }
+    //?} else {
+    /*@Override
+    public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        if (!showWorld()) super.renderBackground(graphics, mouseX, mouseY, partialTick);
+    }
+
+    @Override
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        draw(HudCompat.canvas(graphics), mouseX, mouseY);
+        super.render(graphics, mouseX, mouseY, partialTick);
+    }
+    *///?}
 
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {

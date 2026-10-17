@@ -26,8 +26,9 @@ decided; add manual steps to `context/TESTING.md`; keep `CHANGELOG.md` current.
 - Stonecutter 0.9.8 + loom-back-compat 0.4.2, Loom 1.18-SNAPSHOT, Gradle 9.8.0, Fabric Loader 0.19.5.
 - Per-node versions (Fabric API, YACL, Mod Menu, `mod.mc_compat`) live in `stonecutter.properties.toml`.
 - JDK 25 builds everything; 1.21.x nodes target Java 21, 26.x nodes Java 25.
+- Nodes: `1.21.11`, `26.2` (`vcsVersion`, the side of every `//? if` that is uncommented in `src/`).
 - Run configs: `:26.2:runClient` (Ft10Dev), `:26.2:runOpponent` (Ft10Rival, own run dir), `:26.2:runServer`
-  (`run/server`).
+  (`run/server`); the same tasks on `:1.21.11:` run in `run/1.21.11/`.
 
 ## Releasing (same flow as rGoldenHeads)
 1. Bump `mod.version` (and `mod.version_type`) in `stonecutter.properties.toml`; add a `## <version>` section on top

@@ -6,9 +6,16 @@ import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.Style;
+//? if >=26.1 {
 import net.minecraft.world.entity.EntityTypes;
+//?} else {
+/*import net.minecraft.world.entity.EntityType;
+*///?}
 
-/** Hover and click events became records with one subclass per action in 1.21.5. */
+/**
+ * Hover and click events became records with one subclass per action in 1.21.5. The entity type constants moved
+ * from {@code EntityType} to {@code EntityTypes} in 26.x.
+ */
 public final class TextCompat {
     private TextCompat() {}
 
@@ -19,7 +26,12 @@ public final class TextCompat {
         if (!(style.getHoverEvent() instanceof HoverEvent.ShowEntity show)) return Optional.empty();
         HoverEvent.EntityTooltipInfo info = show.entity();
         String name = info.name.map(Component::getString).orElse(null);
-        return Optional.of(new HoverEntity(info.uuid, info.type == EntityTypes.PLAYER, name));
+        //? if >=26.1 {
+        boolean isPlayer = info.type == EntityTypes.PLAYER;
+        //?} else {
+        /*boolean isPlayer = info.type == EntityType.PLAYER;
+        *///?}
+        return Optional.of(new HoverEntity(info.uuid, isPlayer, name));
     }
 
     public static Style runCommand(Style style, String command) {

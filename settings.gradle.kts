@@ -24,7 +24,7 @@ plugins {
 stonecutter {
     create(rootProject) {
         // One node per jar. Each node's supported range lives in stonecutter.properties.toml (mod.mc_compat).
-        versions("26.2")
+        versions("1.21.11", "26.2")
         vcsVersion = "26.2"
     }
 }

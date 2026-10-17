@@ -14,7 +14,9 @@ import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.world.entity.EntityType;
+//? if >=26.1 {
 import net.minecraft.world.entity.EntityTypes;
+//?}
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -86,4 +88,13 @@ class DeathMessagesTest {
         return Component.literal(name).withStyle(style -> style.withHoverEvent(
             new HoverEvent.ShowEntity(new HoverEvent.EntityTooltipInfo(type, uuid, Component.literal(name)))));
     }
+
+    // Before 26.x the constants were on EntityType itself. A nested class loads lazily, after the bootstrap.
+    //? if <26.1 {
+    /*private static final class EntityTypes {
+        static final EntityType<?> PLAYER = EntityType.PLAYER;
+        static final EntityType<?> ZOMBIE = EntityType.ZOMBIE;
+        static final EntityType<?> WOLF = EntityType.WOLF;
+    }
+    *///?}
 }

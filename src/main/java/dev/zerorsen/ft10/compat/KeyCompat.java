@@ -1,7 +1,11 @@
 package dev.zerorsen.ft10.compat;
 
 import com.mojang.blaze3d.platform.InputConstants;
+//? if >=26.1 {
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
+//?} else {
+/*import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+*///?}
 import net.minecraft.client.KeyMapping;
 import net.minecraft.resources.Identifier;
 
@@ -17,7 +21,12 @@ public final class KeyCompat {
     /** An unbound key in the "FT10" category of the controls screen. */
     public static KeyMapping register(String translationKey) {
         if (category == null) category = KeyMapping.Category.register(Identifier.fromNamespaceAndPath("ft10", "main"));
-        return KeyMappingHelper.registerKeyMapping(
-            new KeyMapping(translationKey, InputConstants.Type.KEYSYM, InputConstants.UNKNOWN.getValue(), category));
+        KeyMapping key = new KeyMapping(translationKey, InputConstants.Type.KEYSYM, InputConstants.UNKNOWN.getValue(),
+            category);
+        //? if >=26.1 {
+        return KeyMappingHelper.registerKeyMapping(key);
+        //?} else {
+        /*return KeyBindingHelper.registerKeyBinding(key);
+        *///?}
     }
 }

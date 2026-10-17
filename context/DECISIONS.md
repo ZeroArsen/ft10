@@ -42,3 +42,19 @@ event 3, which arrives in time; the health scan stays as a fallback.
 appended; decoders skip unknown bytes and never throw, so a buggy or newer plugin can't kick players. Hello
 must be sent when the client registers `ft10:hello` itself: Paper silently drops messages on channels the client
 hasn't registered yet, and Fabric registers `ft10:kill` first (found in the Paper 26.2 test).
+
+**D13 — Version guards are explicit `//? if` blocks in `compat/`, not Stonecutter string replacements.** A
+replacement is applied backwards when switching to the other version, so `EntityTypes` → `EntityType` would also
+turn the real `EntityType<?>` into `EntityTypes<?>` on the way back. Only `ResourceLocation` ↔ `Identifier` stays a
+replacement. The boundary is `>=26.1` (as in the owner's Levy mod); FtCommand's builders moved into
+`CommandCompat` so no file outside `compat/` has a guard (the test's `EntityTypes` holder is the one exception).
+
+**D14 — 1.21.x dev runs add YACL's nested libraries by hand.** Remapping Loom strips the `jars` list of remapped
+mods and Modrinth's POM lists no dependencies, so the 1.21.11 dev client crashed on
+`org.quiltmc.parsers.json.gson.GsonWriter`. `localRuntime` quilt-parsers json/gson 0.2.1 and imageio-webp 3.12.0
+(Quilt maven, restricted to `org.quiltmc.parsers`) for `<26.1` only. The published jar is unchanged: players'
+YACL carries the libraries itself.
+
+**D15 — Each non-main version runs in `run/<version>/`.** 26.2 keeps `run/` (and `run/opponent`, `run/server`) so
+existing test notes stay valid; 1.21.11 uses `run/1.21.11/…`, so an older Minecraft never opens a world or options
+file written by a newer one.

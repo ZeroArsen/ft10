@@ -9,10 +9,18 @@ public final class ClientCompat {
 
     /** 26.x moved screen handling from Minecraft to Gui. */
     public static void setScreen(Minecraft minecraft, Screen screen) {
+        //? if >=26.1 {
         minecraft.gui.setScreen(screen);
+        //?} else {
+        /*minecraft.setScreen(screen);
+        *///?}
     }
 
     public static Screen screen(Minecraft minecraft) {
+        //? if >=26.1 {
         return minecraft.gui.screen();
+        //?} else {
+        /*return minecraft.screen;
+        *///?}
     }
 }

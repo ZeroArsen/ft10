@@ -1,7 +1,7 @@
 package dev.zerorsen.ft10.command;
 
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.argument;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.literal;
+import static dev.zerorsen.ft10.compat.CommandCompat.argument;
+import static dev.zerorsen.ft10.compat.CommandCompat.literal;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
