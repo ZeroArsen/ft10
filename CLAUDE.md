@@ -30,6 +30,13 @@ decided; add manual steps to `context/TESTING.md`; keep `CHANGELOG.md` current.
 - Run configs: `:26.2:runClient` (Ft10Dev), `:26.2:runOpponent` (Ft10Rival, own run dir), `:26.2:runServer`
   (`run/server`); the same tasks on `:1.21.11:` run in `run/1.21.11/`.
 
+## Releasing (same flow as rGoldenHeads)
+1. Bump `mod.version` (and `mod.version_type`) in `stonecutter.properties.toml`; add a `## <version>` section on top
+   of `CHANGELOG.md` (only the newest section goes to Modrinth). `MODRINTH.md` is the Modrinth page body.
+2. Commit, then `git tag v<version>` and push the tag. `.github/workflows/release.yml` builds every node,
+   makes a GitHub Release and runs `gradlew modrinth` (one Modrinth version per node) with the `MODRINTH_TOKEN`
+   repo secret. Check a release locally with `gradlew modrinth -Pft10.modrinthDryRun --no-configuration-cache`.
+
 ## Context files
 - `context/PROGRESS.md` — phase checklist and next task. **Read first.**
 - `context/ARCHITECTURE.md` — packages, signal flow, kill detection, version boundaries.

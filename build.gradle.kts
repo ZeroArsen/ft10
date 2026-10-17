@@ -1,6 +1,7 @@
 plugins {
     // Picks remapping Loom for obfuscated versions (<=1.21.11) and plain Loom for 26.1+.
     id("dev.kikugie.loom-back-compat")
+    id("com.modrinth.minotaur")
 }
 
 // DO NOT set group = ...! (Stonecutter nodes share one group; see the template notes.)
@@ -139,4 +140,44 @@ tasks {
         from(loomx.modJar.flatMap { it.archiveFile }, loomx.modSourcesJar.flatMap { it.archiveFile })
         into(rootProject.layout.buildDirectory.file("libs/${project.property("mod.version")}"))
     }
+}
+
+// ---- Modrinth (same setup as rGoldenHeads) ------------------------------------------------------------
+// Minotaur reads the token from the MODRINTH_TOKEN environment variable, so nothing secret is in this
+// file. `gradlew modrinth` uploads one version per Stonecutter node; the release workflow runs it for
+// v* tags. `-Pft10.modrinthDryRun` prints the request instead of uploading (no token needed).
+val mcReleases: List<String> = sc.properties.rawOrNull("mod", "mc_releases")
+    ?.asList().orEmpty().map { it.toString() }
+
+modrinth {
+    projectId = "ft10"
+    versionNumber = "${property("mod.version")}+${sc.current.version}"
+    versionName = "FT10 ${property("mod.version")} for ${mcReleases.firstOrNull() ?: sc.current.version}" +
+        if (mcReleases.size > 1) "–${mcReleases.last()}" else ""
+    versionType = sc.properties.get<String>("mod.version_type")
+    uploadFile.set(loomx.modJar)
+    gameVersions.addAll(mcReleases)
+    loaders.add("fabric")
+    dependencies {
+        required.project("fabric-api")
+        required.project("yacl")
+        optional.project("modmenu")
+    }
+    // Only the newest CHANGELOG.md section (an H2 per version), without its heading.
+    changelog = providers.fileContents(rootProject.layout.projectDirectory.file("CHANGELOG.md")).asText.map { text ->
+        Regex("""(?ms)^##[^\S\n]+.*?(?=^##[^\S\n]|\z)""").find(text)?.value
+            ?.replaceFirst(Regex("""(?m)^##[^\S\n]+.*(?:\R|$)"""), "")?.trim() ?: text.trim()
+    }
+    // The project page body; relative links don't work on Modrinth, so MODRINTH.md uses absolute URLs.
+    syncBodyFrom = providers.fileContents(rootProject.layout.projectDirectory.file("MODRINTH.md")).asText
+    if (providers.gradleProperty("ft10.modrinthDryRun").isPresent) {
+        debugMode = true
+        token = "dry-run" // debug mode only prints the request, but Minotaur still wants a value
+    }
+}
+
+tasks.named("modrinth") {
+    notCompatibleWithConfigurationCache("Minotaur")
+    // The page body is shared by every version, so only the active node refreshes it.
+    if (sc.current.isActive) dependsOn(tasks.named("modrinthSyncBody"))
 }

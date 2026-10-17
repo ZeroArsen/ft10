@@ -18,7 +18,8 @@
 - [ ] **5. Multi-version** — **1.21.11 done** (2026-10-17: both jars build, 36 tests pass on each, RCON
   two-player run in `TESTING.md`). Left: 26.3 and 26.1.2, then 1.21.10 down to 1.21.1. Versions per node are
   already looked up (see below).
-- [ ] **6. Release** — GitHub repo, CI publish, Modrinth project page, v1.0.0.
+- [ ] **6. Release** — GitHub repo ✅ (public, CI green), Modrinth publishing set up (Minotaur + release.yml);
+  waiting for the owner to create the Modrinth project `ft10` and add the `MODRINTH_TOKEN` secret, then tag v0.1.0.
 
 ## Next task
 The owner reviews and commits RevoltFFA's `Ft10Bridge`, then tries the 1.21.11 jar on the real RevoltFFA server.
