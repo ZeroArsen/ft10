@@ -37,15 +37,6 @@
 | Client restart | ✅ scores saved per server and resumed |
 | HUD next to a server action bar ("Combat: 10s") | ✅ drawn just above it, no overlap (screenshot) |
 
-## Server integration run — 2026-10-17, Paper 26.2 build 134 + test plugin (docs example code)
-| Scenario | Result |
-|---|---|
-| Join | ✅ `ft10:hello` after the fix above (first try: dropped because sent before the client registered it) |
-| Real kill (plugin report + vanilla message) | ✅ exactly one point each side |
-| `ft10test kill` without any death (fake-death server) | ✅ counted, reached VICTORY |
-| Regex kill message on a reporting server | ✅ ignored |
-| Combat log (cause 1) | ✅ counted for the other player |
-
 ## Automated run — 2026-10-17, 1.21.11 (Fabric server, RCON-driven, both clients)
 | Scenario | Result |
 |---|---|
@@ -63,22 +54,6 @@
 | Goal 3 reached by the opponent | ✅ DEFEAT title, `FT3 · 3 - 3` subtitle, chat `You lost FT3 against Ft10Rival. (3 - 3) | Sets 0 - 1`, new set `0 - 0`; Rival `You won FT3 …` |
 | `/ft hud` (typed by window messages) | ✅ editor drawn (help text, Done/Reset/Cancel, outline, center guide, world behind); arrow keys ×3 + Esc saved `hudOffsetX: 3` |
 | `/ft config` | ✅ YACL screen opens (General / Display / Title, Chat & Sound / Detection) |
-
-## Server integration run — 2026-10-17, RevoltFFA + Paper 1.21.11 build 132
-The owner's `C:/dev/mc-plugins/RevoltFFA` (uncommitted `Ft10Bridge`, jar built 17:11) on a **copy** of its `run/`
-folder in the session scratchpad, with `online-mode=false`, RCON and bStats off in the copy only; the owner's
-files were not changed. Players joined the "duel" arena with `execute as <player> run ffa join duel`.
-
-| Scenario | Result |
-|---|---|
-| Join with FT10 | ✅ both clients: "This server reports kills to FT10, so every point is exact." |
-| Kill in the arena (`damage … by Ft10Dev` after spawn protection) | ✅ exactly one point each side; RevoltFFA's "☠ Ft10Rival was slain by Ft10Dev" (matches a preset regex) added nothing |
-| Combat log: Dev hits Rival, Rival's client is killed | ✅ "☠ Ft10Rival logged out in combat — Ft10Dev gets the kill", Dev `+1 (2 - 0)`. The offline victim gets nothing, so Rival's own count stays one behind |
-| Combat log when the victim was never hit (Rival still spawn-protected) | ✅ no attribution, nothing sent, no point |
-| Kill in the lobby | ✅ nothing sent, no point |
-| `integration.ft10: false` + `/rffa reload`, same connection | ⚠️ nothing sent, and FT10 counts nothing either: it still trusts the hello it got on join. RevoltFFA's checklist expects a fallback to guessing |
-| … after both players rejoin | ✅ no hello, FT10 guesses again: one point each side |
-| Player without the mod | not tested (no vanilla client in the script) |
 
 ## Still to check by hand
 - [ ] Kill with a bow; void/fall after a hit ("doomed to fall by").

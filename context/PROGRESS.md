@@ -9,12 +9,9 @@
   translatable parsing with real Minecraft classes.
 - [x] **3. Settings** — `Ft10Config` (config/ft10.json), YACL screen, Mod Menu entrypoint, en_us + tr_tr.
 - [x] **4. Real test** — RCON-driven two-player run on a Fabric 26.2 server (found and fixed the instant-respawn
-  miss) and a Paper 26.2 run of the server integration (found and fixed the hello timing). See `TESTING.md`.
-- [x] **4b. Round 2 features** — HUD editor, hotkeys, server integration protocol v1, author 0Arsen.
-- [ ] **4c. RevoltFFA bridge** — `Ft10Bridge` in `C:/dev/mc-plugins/RevoltFFA` (left uncommitted for review).
-  Tested 2026-10-17 with the 1.21.11 build on a copy of its dev server (`TESTING.md`): hello, arena kill, combat
-  log and lobby deaths all correct. Open: turning `integration.ft10` off mid-connection leaves FT10 counting
-  nothing until rejoin; a player without the mod is untested.
+  miss). See `TESTING.md`.
+- [x] **4b. Round 2 features** — HUD editor, hotkeys, author 0Arsen.
+- [x] **4c. Server integration removed** (D16): FT10 needs nothing on the server.
 - [ ] **5. Multi-version** — **1.21.11 done** (2026-10-17: both jars build, 36 tests pass on each, RCON
   two-player run in `TESTING.md`). Left: 26.3 and 26.1.2, then 1.21.10 down to 1.21.1. Versions per node are
   already looked up (see below).

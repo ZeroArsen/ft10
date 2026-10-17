@@ -11,7 +11,6 @@
   "ft10.chat.set_lost": "%s maçını %s karşısında kaybettin.",
   "ft10.sets": "Setler %s",
   "ft10.hud.vs": "vs %s",
-  "ft10.server.hello": "Bu sunucu kill'leri FT10'a bildiriyor, her puan kesin.",
   "ft10.action.hud_shown": "Skor HUD gösteriliyor",
   "ft10.action.hud_hidden": "Skor HUD gizlendi",
 
@@ -146,8 +145,6 @@
   "ft10.config.switchOnHit.desc": "Savaşmaya başladığın kişinin skorunu göster. Kapalıysa rakip sadece kill ile değişir.",
   "ft10.config.switchLockSeconds": "Savaş kilidi (saniye)",
   "ft10.config.switchLockSeconds.desc": "Ekrandaki rakiple bu süre içinde vuruştuysan, başka birinin sana vurması ekranı değiştirmez.",
-  "ft10.config.trustServerKills": "Sunucunun kill bildirimlerine güven",
-  "ft10.config.trustServerKills.desc": "FT10 entegrasyonu olan sunucularda (RevoltFFA gibi) kill'leri chat ve vuruşlardan tahmin etmek yerine sunucunun bildirdiği şekilde say.",
   "ft10.config.usePresetPatterns": "Hazır kill mesajı formatları",
   "ft10.config.usePresetPatterns.desc": "\"X was slain by Y\", \"Y killed X\" gibi yaygın plugin mesajlarını tanı. Vanilla ölüm mesajları her zaman çalışır.",
   "ft10.config.customPatterns": "Özel kill mesajı kalıpları",

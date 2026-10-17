@@ -47,8 +47,6 @@ public final class Ft10Config {
     public boolean switchOnHit = true;
     public boolean usePresetPatterns = true;
     public List<String> customPatterns = new ArrayList<>();
-    /** Accept ft10:hello / ft10:kill from server plugins (docs/SERVER_INTEGRATION.md). */
-    public boolean trustServerKills = true;
 
     // First-to goal
     public int goal = 0;

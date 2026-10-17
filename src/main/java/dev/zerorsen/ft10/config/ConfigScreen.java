@@ -119,8 +119,6 @@ public final class ConfigScreen {
                 .option(bool("switchOnHit", d.switchOnHit, () -> c.switchOnHit, v -> c.switchOnHit = v))
                 .option(slider("switchLockSeconds", d.switchLockSeconds, () -> c.switchLockSeconds,
                     v -> c.switchLockSeconds = v, 0, 30, 1))
-                .option(bool("trustServerKills", d.trustServerKills, () -> c.trustServerKills,
-                    v -> c.trustServerKills = v))
                 .option(bool("usePresetPatterns", d.usePresetPatterns, () -> c.usePresetPatterns,
                     v -> c.usePresetPatterns = v))
                 .group(ListOption.<String>createBuilder()

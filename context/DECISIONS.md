@@ -58,3 +58,8 @@ YACL carries the libraries itself.
 **D15 — Each non-main version runs in `run/<version>/`.** 26.2 keeps `run/` (and `run/opponent`, `run/server`) so
 existing test notes stay valid; 1.21.11 uses `run/1.21.11/…`, so an older Minecraft never opens a world or options
 file written by a newer one.
+
+**D16 — Server integration removed (replaces D12).** FT10 exists for servers that have no score counter of their
+own; a feature that needs code on the server works against that. `ft10:hello` / `ft10:kill`, `NetCompat`,
+`trustServerKills` and `docs/SERVER_INTEGRATION.md` are gone, and RevoltFFA's uncommitted `Ft10Bridge` was
+reverted. Better client-side detection replaces it. FT10 needs nothing installed on the server, ever.

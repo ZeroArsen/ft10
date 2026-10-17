@@ -2,7 +2,6 @@ package dev.zerorsen.ft10;
 
 import dev.zerorsen.ft10.command.FtCommand;
 import dev.zerorsen.ft10.compat.HudCompat;
-import dev.zerorsen.ft10.compat.NetCompat;
 import dev.zerorsen.ft10.feedback.ScoreHud;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
@@ -40,7 +39,6 @@ public final class Ft10Client implements ClientModInitializer {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, context) -> FtCommand.register(dispatcher));
         HudCompat.register(Identifier.fromNamespaceAndPath(MOD_ID, "score"), ScoreHud::render);
         Keybinds.register();
-        NetCompat.register(ft10::onServerHello, ft10::onServerKill);
 
         LOGGER.info("FT10 {} loaded for Minecraft {}", VERSION, MINECRAFT);
     }
