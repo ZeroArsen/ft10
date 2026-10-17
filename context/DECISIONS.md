@@ -1,0 +1,31 @@
+# Decisions (append-only)
+
+**D1 — Name and identity.** FT10 — PvP Score Counter; Modrinth slug, mod id and data folder `ft10`; commands
+`/ft10` (always) and `/ft` (optional alias). "ft10" had zero Modrinth search hits on 2026-10-17, the closest
+competitors were MatchHUD and Kill Counter. Package `dev.zerorsen.ft10`.
+
+**D2 — Opponent switching.** The screen follows the first hit exchange with someone (owner's choice), with a
+5 s lock while still fighting the shown opponent so a stray third-party hit doesn't steal it. Kills always
+count for the right rivalry even when the screen doesn't switch (`/ft lock`).
+
+**D3 — Persistence.** Scores are saved per server to `<game dir>/ft10/scores.json` (owner's choice), separate
+from settings in `config/ft10.json` so a config reset never wipes scores.
+
+**D4 — Display.** Our own HUD element just above the vanilla action bar instead of the real action bar (owner's
+choice): FFA servers use the action bar constantly (combat timers) and would overwrite or flicker with it.
+
+**D5 — Chat feedback is local only.** Never send chat or commands to the server: automated chat breaks most
+server rules and the mod must stay a pure information display.
+
+**D6 — Kill detection by combining signals.** Death messages (vanilla translatable with show_entity UUIDs, plus
+regex for plugin formats), damage-event attribution and health-based death detection, merged by
+`KillDetector` with a 1 s wait for a message and a 2.5 s dedupe window.
+
+**D7 — Build stack.** Stonecutter 0.9.8 + loom-back-compat (the official Stonecutter Fabric template) with
+Mojang mappings on every version, so one source tree compiles for obfuscated 1.21.x and unobfuscated 26.x.
+
+**D8 — YACL required, Mod Menu optional.** YACL exists for every target version (1.21 → 26.4) and the Modrinth
+app installs required dependencies automatically; Mod Menu only adds the settings button.
+
+**D9 — Dependencies come from Modrinth Maven** (`maven.modrinth:yacl`, `maven.modrinth:modmenu`): one
+repository, version numbers identical to the Modrinth pages.

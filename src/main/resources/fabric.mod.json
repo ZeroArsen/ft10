@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "id": "${id}",
+  "version": "${version}",
+  "name": "${name}",
+  "description": "Client-side PvP score counter for FFA and duels. Remembers who you are fighting and shows your first-to score above the action bar.",
+  "authors": [
+    "0Arsen"
+  ],
+  "contact": {
+    "homepage": "https://modrinth.com/mod/ft10",
+    "sources": "https://github.com/ZeroArsen/ft10",
+    "issues": "https://github.com/ZeroArsen/ft10/issues"
+  },
+  "license": "GPL-3.0-only",
+  "icon": "assets/ft10/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "dev.zerorsen.ft10.Ft10Client"
+    ],
+    "modmenu": [
+      "dev.zerorsen.ft10.config.ModMenuIntegration"
+    ]
+  },
+  "mixins": [
+    "ft10.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=${loader}",
+    "minecraft": "${minecraft}",
+    "fabric-api": "*",
+    "yet_another_config_lib_v3": "*"
+  },
+  "suggests": {
+    "modmenu": "*"
+  }
+}

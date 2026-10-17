@@ -1,0 +1,11 @@
+{
+  "required": true,
+  "package": "dev.zerorsen.ft10.mixin",
+  "compatibilityLevel": "${java}",
+  "client": [
+    "ClientPacketListenerMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

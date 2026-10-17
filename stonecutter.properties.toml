@@ -1,0 +1,22 @@
+# Shared and per-node build properties.
+# https://stonecutter.kikugie.dev/wiki/config/properties#centralized-properties
+mod.id = "ft10"
+mod.name = "FT10"
+mod.group = "dev.zerorsen"
+mod.version = "0.1.0"
+
+deps.fabric_loader = "0.19.5"
+loomx.loom_version = "1.18-SNAPSHOT"
+
+# Each node below builds one jar.
+#   mod.mc_compat   -> "minecraft" range written into fabric.mod.json
+#   mod.mc_releases -> versions the jar is marked compatible with on Modrinth
+#   deps.*          -> versions of the mods we compile against (looked up on Modrinth per node)
+
+["26.2"]
+mod.mc_compat = "~26.2"
+mod.mc_releases = ["26.2"]
+
+deps.fabric_api = "0.161.0+26.2"
+deps.yacl = "3.9.7+26.2-fabric"
+deps.modmenu = "20.0.3"

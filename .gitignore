@@ -1,0 +1,34 @@
+# gradle
+.gradle/
+.kotlin/
+build/
+out/
+classes/
+
+# idea
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# vscode / eclipse
+.settings/
+.vscode/
+bin/
+.classpath
+.project
+*.launch
+
+# os
+*.DS_Store
+Thumbs.db
+
+# fabric dev runs (client, opponent client, dev server) and logs from unit tests
+run/
+logs/
+
+# java crash/profiling output
+hs_err_*.log
+replay_*.log
+*.hprof
+*.jfr

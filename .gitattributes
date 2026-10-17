@@ -1,0 +1,10 @@
+# Normalize text files to LF in the repository.
+* text=auto eol=lf
+
+# Windows scripts keep CRLF.
+*.bat text eol=crlf
+
+# Binary files.
+*.jar binary
+*.png binary
+*.webp binary
