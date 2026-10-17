@@ -55,6 +55,22 @@
 | `/ft hud` (typed by window messages) | ✅ editor drawn (help text, Done/Reset/Cancel, outline, center guide, world behind); arrow keys ×3 + Esc saved `hudOffsetX: 3` |
 | `/ft config` | ✅ YACL screen opens (General / Display / Title, Chat & Sound / Detection) |
 
+## Automated run — 2026-10-17, 0.2.0 kill signals (26.2 and 1.21.11, RCON-driven, `-Pft10.debug`)
+Same on both versions unless noted.
+
+| Scenario | Result |
+|---|---|
+| `tellraw @a ["☠ ", {translate death.attack.player, with [Rival, Dev]}]` (wrapped vanilla) | ✅ one point each side, source `vanilla` |
+| `tellraw Ft10Dev "You killed Ft10Rival!"` | ✅ Dev +1 (`you-killed`) |
+| `title Ft10Dev actionbar "You killed Ft10Rival"` ×5 over 6 s | ✅ one point |
+| Sidebar `Kills` 5 → 6 after Dev hit Rival (no death at all) | ✅ Dev +1 (weak guess Rival); Rival (only got hit): "you hit nobody recently", no point |
+| Sidebar `Kills` +1, `Deaths` +1 and "Ft10Rival was slain by Ft10Dev" together (26.2) | ✅ exactly one point each side |
+| Debug: `tellraw Ft10Dev "REKT Ft10Rival (+5 coins)"` mid-fight (26.2) | ✅ "Not recognized (chat): … [Copy]" |
+| `title subtitle "Ft10Rival"` + `title title "ELIMINATED"` (26.2) | ✅ Dev +1 (`kill-title`, title + subtitle read together) |
+| Real kill (`damage … 100 … by Ft10Dev`) | ✅ one point each side (death screen + chat message deduped) |
+
+Run `-Pft10.debug` with `-Pft10.join=localhost` to get the debug lines in `[CHAT]` and `[debug]` log lines.
+
 ## Still to check by hand
 - [ ] Kill with a bow; void/fall after a hit ("doomed to fall by").
 - [ ] Third player hits Ft10Dev mid-fight → screen stays; new opponent → 0 - 0; back → old score.
@@ -66,4 +82,5 @@
       Esc-to-save were checked by script on 2026-10-17; R, Reset and Cancel were not.
 - [ ] Hotkeys in Options → Controls → FT10: toggle, HUD, undo, reset, settings, editor.
 - [ ] F1 hides the HUD. Turkish client language → Turkish texts.
-- [ ] Public FFA servers with plugin kill messages (owner).
+- [ ] Public FFA servers with plugin kill messages (owner): run `/ft debug`, report "Not recognized" lines.
+- [ ] Real fight with sword swings: sidebar kill counter on a fake-death server; `countCombatLogs` on.

@@ -6,12 +6,12 @@
 | `Ft10Client` | Entrypoint: registers Fabric events, commands, HUD element. |
 | `Ft10` | Runtime singleton: config, stored scores, the current `Session`; turns game events into session calls. |
 | `core/` | Pure Java scoring rules (no Minecraft imports, unit tested). |
-| `mc/` | Minecraft → core translation: `Players` (tab list lookups), `DeathMessages`, `ServerKey`. |
-| `feedback/` | `ScoreHud` (drawing), `Notifier` (title/chat/sound), `Texts` (house-style components). |
+| `mc/` | Minecraft → core translation: `Players` (tab list lookups), `DeathMessages`, `Sidebar` (sidebar rows), `ServerKey`. |
+| `feedback/` | `ScoreHud` (drawing), `Notifier` (title/chat/sound), `Texts` (house-style components), `Debug` (`/ft debug`). |
 | `command/` | `FtCommand`: the `/ft10` and `/ft` trees (client commands). |
 | `config/` | `Ft10Config` + `ConfigManager` (config/ft10.json), `ScoreStorage` (ft10/scores.json), YACL `ConfigScreen`, `ModMenuIntegration`. |
 | `compat/` | Every call that differs between Minecraft versions. Stonecutter conditions belong here. |
-| `mixin/` | `ClientPacketListenerMixin`: damage-event, entity-death-event and player-combat-kill packets. |
+| `mixin/` | `ClientPacketListenerMixin`: damage event, entity death event, player combat kill, action bar, title, subtitle and player-info-remove packets. |
 | `Keybinds` | Six optional hotkeys; `feedback/HudEditorScreen` is the drag-and-drop HUD editor. |
 
 ## Signal flow
@@ -20,10 +20,15 @@ AttackEntityCallback (we swing)            ─┐
 DamageEvent packet (A hurt B, mixin)        ├─> Ft10 ──> Session.onHit / onSwing      (who is fighting whom)
 PlayerCombatKill packet (we died, mixin)    │          Session.onDeathMessage / onDeathSeen
 EntityEvent 3 packet (a player died, mixin) │
-GAME chat message (death messages)          │
-client tick: other players' health hits 0  ─┘          Session.tick → KillDetector settles pending deaths
+GAME chat message (death/kill messages)     │          (mc/DeathMessages: vanilla death.* anywhere in the
+ActionBar / Title / Subtitle packets (mixin)│           component tree, else DeathMessageParser patterns;
+                                            │           action bars and titles pass RepeatGuard first)
+client tick: other players' health hits 0   │
+every 5 ticks: sidebar "Kills"/"Deaths"     │   → StatWatcher → Session.onKillCounted / onDeathCounted
+PlayerInfoRemove packet (mixin)            ─┘   → Session.onPlayerLeft (only with countCombatLogs)
+                                                       Session.tick → KillDetector settles pending deaths
                                                                  └─> ScoreBook.award → Notifier (title/chat/sound)
-ScoreHud reads Session.book().active() every frame.
+ScoreHud reads Session.book().active() every frame. feedback/Debug explains each signal when /ft debug is on.
 ```
 
 ## Kill detection (core)
@@ -31,6 +36,13 @@ ScoreHud reads Session.book().active() every frame.
 - `KillDetector`: a death message (names the killer) settles a death at once. A death we only *see* waits
   `PENDING_MS` (1 s) for a message, then falls back to the hit-based guess. A settled victim is ignored for
   `DEDUPE_MS` (2.5 s), so packet + chat + health never count one death twice.
+- A **weak** pending death (from a sidebar kill counter: the victim is guessed as the player we last hit or swung
+  at) is dropped when its killer was credited with any other kill within `DEDUPE_MS` (D17).
+- `DeathMessageParser`: presets (second-person "You killed X" / "X killed you" first), custom templates
+  (`{victim}`/`{killer}`, `*`) or regexes. No victim group = the player themself died; no killer group = the hit
+  history decides. **Loose** presets ("X was <words> by Y") count only against a current opponent.
+- `mc/DeathMessages` resolves names: show_entity hovers in the message, tab list profile names, our own name, tab
+  list / nametag display names, and finally a recent opponent by name (someone who already left).
 - Points only when we are the victim or the killer.
 - Screen switching (`Session.engage`): the first hit with someone shows their score, unless we traded hits with
   the shown opponent within `switchLockSeconds`. A finished fight (either side died) releases the lock at once.

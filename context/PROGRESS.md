@@ -12,16 +12,19 @@
   miss). See `TESTING.md`.
 - [x] **4b. Round 2 features** — HUD editor, hotkeys, author 0Arsen.
 - [x] **4c. Server integration removed** (D16): FT10 needs nothing on the server.
+- [x] **4d. Kill detection round 2** (D17–D19): wrapped vanilla messages, second-person and broad presets,
+  templates, action bar/title parsing, sidebar kill/death counters, optional combat logs, `/ft debug`. 57 unit
+  tests per version; RCON run on 26.2 and 1.21.11 (`TESTING.md`).
 - [ ] **5. Multi-version** — **1.21.11 done** (2026-10-17: both jars build, 36 tests pass on each, RCON
-  two-player run in `TESTING.md`). Left: 26.3 and 26.1.2, then 1.21.10 down to 1.21.1. Versions per node are
-  already looked up (see below).
-- [ ] **6. Release** — GitHub repo ✅ (public, CI green), Modrinth publishing set up (Minotaur + release.yml);
-  waiting for the owner to create the Modrinth project `ft10` and add the `MODRINTH_TOKEN` secret, then tag v0.1.0.
+  two-player run in `TESTING.md`; merged into main in 0.2.0). Left: 26.3 and 26.1.2, then 1.21.10 down to
+  1.21.1. Versions per node are already looked up (see below).
+- [x] **6. Release** — GitHub repo (public, CI green); Modrinth project `ft10` (in review). v0.1.0 (26.2)
+  released 2026-10-17; v0.2.0 (26.2 + 1.21.11) adds the 1.21.11 jar and the new detection.
 
 ## Next task
-The owner reviews and commits RevoltFFA's `Ft10Bridge`, then tries the 1.21.11 jar on the real RevoltFFA server.
-Next port: 26.1.2 (it settles whether each `>=26.1` guard really belongs at 26.1, see ARCHITECTURE.md) and 26.3,
-then 1.21.10 down to 1.21.1 (the 1.21.9, 1.21.6 and 1.21.5 boundaries in ARCHITECTURE.md still need guards).
+The owner tests on public servers with `/ft debug` and reports "Not recognized" messages; add the formats as
+presets. Next port: 26.1.2 (it settles whether each `>=26.1` guard really belongs at 26.1, see ARCHITECTURE.md) and
+26.3, then 1.21.10 down to 1.21.1 (the 1.21.9, 1.21.6 and 1.21.5 boundaries in ARCHITECTURE.md still need guards).
 
 ## Dependency versions per node (Modrinth, 2026-10-17)
 | Node | Fabric API | YACL | Mod Menu |

@@ -3,7 +3,7 @@
 mod.id = "ft10"
 mod.name = "FT10"
 mod.group = "dev.zerorsen"
-mod.version = "0.1.0"
+mod.version = "0.2.0"
 # Modrinth release channel for this version: release, beta or alpha.
 mod.version_type = "beta"
 

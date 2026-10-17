@@ -63,3 +63,20 @@ file written by a newer one.
 own; a feature that needs code on the server works against that. `ft10:hello` / `ft10:kill`, `NetCompat`,
 `trustServerKills` and `docs/SERVER_INTEGRATION.md` are gone, and RevoltFFA's uncommitted `Ft10Bridge` was
 reverted. Better client-side detection replaces it. FT10 needs nothing installed on the server, ever.
+
+**D17 — More client-side kill signals, each guarded against double counts.** (a) Vanilla `death.*` is searched
+through the whole component tree (plugins wrap it). (b) Action bar and title packets are parsed too, behind a
+`RepeatGuard` (8 s) because servers re-send them every tick. (c) Sidebar `Kills`/`Deaths` counters (+1 steps only)
+catch servers that fake deaths; a kill counter's victim is a guess (last player we hit or swung at, never someone
+who only hit us), so it is a *weak* pending death, dropped if we were credited with another kill around then.
+(d) Broad presets ("X was <words> by Y") only count against someone we fought within the kill credit window, and
+skip moderation verbs. (e) A name not on the tab list still counts when the other side is us and it is a recent
+opponent. (f) Combat logs count only when the player turns it on.
+
+**D18 — Custom patterns are templates first.** `{victim} was killed by {killer}` (`*` = anything) is easier than
+regex; anything with `(?<` stays a regex. A pattern without a victim means the player themself died; without a
+killer, the hit history decides. Both forms share these rules.
+
+**D19 — `/ft debug` is for finding missed formats.** Not saved (off after restart). It explains every signal and
+remembers the last 10 unrecognized messages that mention us or a recent opponent, with a local Copy button.
+`-Pft10.debug` starts dev clients with it on.
