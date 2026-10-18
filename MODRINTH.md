@@ -22,7 +22,7 @@ picks up where you left off.
 | `/ft help` | All commands |
 
 ## Requirements
-[Fabric API](https://modrinth.com/mod/fabric-api) and [YACL](https://modrinth.com/mod/yacl).
+Minecraft 1.21 – 26.3 on Fabric, with [Fabric API](https://modrinth.com/mod/fabric-api) and [YACL](https://modrinth.com/mod/yacl).
 [Mod Menu](https://modrinth.com/mod/modmenu) is optional. Client side only.
 
 FT10 sends nothing to the server and plays nothing for you: it only counts.

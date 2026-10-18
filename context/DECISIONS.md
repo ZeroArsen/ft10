@@ -96,3 +96,10 @@ have none).
 **D21 — HUD shows the opponent's name without "vs".** The unused label color option went with it (Gson ignores the
 old `colorLabel` key). Settings got "Reset scores on this server" and "Reset all scores" buttons, each behind a
 vanilla ConfirmScreen.
+
+**D22 — Ten jars, one per protocol family (1.21 → 26.3).** Nodes 1.21.1, 1.21.3, 1.21.4, 1.21.5, 1.21.8, 1.21.10,
+1.21.11, 26.1.2, 26.2 and 26.3, each built against the newest patch of its family and marked on Modrinth for every
+patch in it. Patches inside a family share intermediary names and protocol, and every node also compiles against
+the family's lowest patch. Fabric API, YACL and Mod Menu are pinned per node to the newest Modrinth build for that
+family. Where a method only changed names (the GUI outline: `renderOutline` → `submitOutline` → `outline`, the
+key input type `KEYSYM` → `KEYBOARD`) the code uses a call that exists everywhere instead of another guard.

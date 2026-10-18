@@ -7,9 +7,9 @@ import net.minecraft.client.gui.screens.Screen;
 public final class ClientCompat {
     private ClientCompat() {}
 
-    /** 26.x moved screen handling from Minecraft to Gui. */
+    /** 26.2 moved screen handling from Minecraft to Gui. */
     public static void setScreen(Minecraft minecraft, Screen screen) {
-        //? if >=26.1 {
+        //? if >=26.2 {
         minecraft.gui.setScreen(screen);
         //?} else {
         /*minecraft.setScreen(screen);
@@ -17,7 +17,7 @@ public final class ClientCompat {
     }
 
     public static Screen screen(Minecraft minecraft) {
-        //? if >=26.1 {
+        //? if >=26.2 {
         return minecraft.gui.screen();
         //?} else {
         /*return minecraft.screen;

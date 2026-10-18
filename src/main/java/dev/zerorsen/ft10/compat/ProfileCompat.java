@@ -8,10 +8,18 @@ public final class ProfileCompat {
     private ProfileCompat() {}
 
     public static UUID id(GameProfile profile) {
+        //? if >=1.21.9 {
         return profile.id();
+        //?} else {
+        /*return profile.getId();
+        *///?}
     }
 
     public static String name(GameProfile profile) {
+        //? if >=1.21.9 {
         return profile.name();
+        //?} else {
+        /*return profile.getName();
+        *///?}
     }
 }

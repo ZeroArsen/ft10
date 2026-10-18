@@ -54,24 +54,32 @@ ScoreHud reads Session.book().active() every frame. feedback/Debug explains each
   Server key = address without `:25565`, `singleplayer:<world>` or `realms:<name>`. Rival key = UUID, or
   `name:<lower-case name>` when no UUID was known. Saved 2 s after the last change and on disconnect/exit.
 
-## Version boundaries to handle in `compat/` (Phase 5)
-Built so far: **1.21.11** and **26.2**. Conditions are written `//? if >=26.1 { … //?} else { /*…*///?}`; the source
-in `src/` is always 26.2's side (`vcsVersion`). The 26.x rows below were checked against the 1.21.11 and 26.2
-jars only: whether each change landed in 26.1 or 26.2 is unverified until a 26.1.2 node exists. Don't put `//`
-comments inside a commented-out branch: Stonecutter strips `//` when it turns the branch on.
+## Version boundaries (`compat/`)
+Ten nodes, one jar per protocol family: 1.21.1 (1.21–1.21.1), 1.21.3 (1.21.2–1.21.3), 1.21.4, 1.21.5, 1.21.8
+(1.21.6–1.21.8), 1.21.10 (1.21.9–1.21.10), 1.21.11, 26.1.2 (26.1–26.1.2), 26.2, 26.3 (D22). Conditions are written
+`//? if >=26.2 { … //?} else { /*…*///?}`; the source in `src/` is always 26.2's side (`vcsVersion`). Every row
+below was checked with javap against that version's jar (2026-10-18), and each node also compiles against the
+lowest patch of its range. Don't put `//` comments inside a commented-out branch: Stonecutter strips `//` when it
+turns the branch on.
 
 | Since | Change | Where |
 |---|---|---|
-| 1.21.5 | Hover/ClickEvent became records (`HoverEvent.ShowEntity`, `ClickEvent.RunCommand`) | `TextCompat` |
-| 1.21.6 | `HudElementRegistry` replaces `HudRenderCallback`; text colors must be ARGB | `HudCompat` |
-| 1.21.9 | authlib 7: `GameProfile` is a record (`id()`, `name()`) | `ProfileCompat` |
-| 1.21.9 | Mouse/key events became records; `KeyMapping.Category` record | `CompatScreen`, `KeyCompat` |
-| 26.x | fabric-key-mapping-api (`KeyMappingHelper`) | `KeyCompat` |
+| 1.21.5 | Hover/ClickEvent became records (`HoverEvent.ShowEntity`, `ClickEvent.RunCommand`); before: `getValue(Action.SHOW_ENTITY)`, `EntityTooltipInfo.id` (now `uuid`), `new ClickEvent(Action, String)` | `TextCompat`, `DeathMessagesTest` |
+| 1.21.6 | `HudElementRegistry` replaces `HudRenderCallback` (before: drawn on top of the whole HUD); GUI pose is a 2D matrix stack (`pushMatrix`, `translate(x, y)`), `PoseStack` before (`pushPose`, `translate(x, y, 0)`); text colors must be ARGB | `HudCompat` |
+| 1.21.9 | authlib 7: `GameProfile` is a record (`id()`, `name()`; `getId()`/`getName()` before) | `ProfileCompat` |
+| 1.21.9 | Mouse/key events became records (`MouseButtonEvent`, `KeyEvent`; `(double, double, int)` / `(int, int, int)` before) | `CompatScreen` |
+| 1.21.9 | `KeyMapping.Category` record (a translation key string before) | `KeyCompat` |
+| – | The outline method was `renderOutline`, `submitOutline` (1.21.9–1.21.10), then `outline` (26.x): drawn with four `fill`s instead | `HudCompat` |
+| 26.3 | `InputConstants.Type.KEYSYM` → `KEYBOARD`: avoided with the `KeyMapping(String, int, category)` constructor | `KeyCompat` |
 | 1.21.11 | `ResourceLocation` → `Identifier` (Stonecutter string replacement) | `stonecutter.gradle.kts` |
 | 26.1 | Unobfuscated; Java 25; Loom without remapping (handled by loom-back-compat) | build |
-| 26.x | `Gui.hud` holds title/action bar/chat (`Gui` itself before); F1 is `Hud.isHidden()` (`options.hideGui` before); chat `addClientSystemMessage` (`addMessage` before) | `HudCompat` |
-| 26.x | `GuiGraphicsExtractor` (`GuiGraphics` before): `text`/`outline` were `drawString`/`renderOutline`; screens override `extractRenderState`/`extractBackground` (`render`/`renderBackground` before) | `HudCompat`, `CompatScreen` |
-| 26.x | `EntityTypes.PLAYER` (`EntityType.PLAYER` before) | `TextCompat`, `DeathMessagesTest` |
-| 26.x | Fabric `ClientCommands` (`ClientCommandManager` before) | `CommandCompat` |
-| 26.x | `Gui.setScreen` / `Gui.screen()` (`Minecraft.setScreen` / `Minecraft.screen` before) | `ClientCompat` |
+| 26.1 | fabric-key-mapping-api (`KeyMappingHelper`) | `KeyCompat` |
+| 26.1 | `GuiGraphicsExtractor` (`GuiGraphics` before): `text` was `drawString`; screens override `extractRenderState`/`extractBackground` (`render`/`renderBackground` before) | `HudCompat`, `CompatScreen` |
+| 26.1 | Chat `addClientSystemMessage` (`addMessage` before) | `HudCompat` |
+| 26.1 | Fabric `ClientCommands` (`ClientCommandManager` before) | `CommandCompat` |
+| 26.2 | `Gui.hud` holds title/action bar/chat (`Gui` itself before); F1 is `Hud.isHidden()` (`options.hideGui` before) | `HudCompat` |
+| 26.2 | `EntityTypes.PLAYER` (`EntityType.PLAYER` before) | `TextCompat`, `DeathMessagesTest` |
+| 26.2 | `Gui.setScreen` / `Gui.screen()` (`Minecraft.setScreen` / `Minecraft.screen` before) | `ClientCompat` |
 | ≤1.21.11 | Remapping Loom drops YACL's nested libraries in dev: `localRuntime` quilt-parsers + imageio-webp | `build.gradle.kts` |
+
+The eight `ClientPacketListener` methods the mixin targets exist under the same names in every node.

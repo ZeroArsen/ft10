@@ -6,8 +6,10 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 /*import net.minecraft.client.gui.GuiGraphics;
 *///?}
 import net.minecraft.client.gui.screens.Screen;
+//? if >=1.21.9 {
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
+//?}
 import net.minecraft.network.chat.Component;
 
 /**
@@ -62,6 +64,7 @@ public abstract class CompatScreen extends Screen {
     }
     *///?}
 
+    //? if >=1.21.9 {
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
         return super.mouseClicked(event, doubleClick) || press(event.x(), event.y(), event.button());
@@ -79,14 +82,37 @@ public abstract class CompatScreen extends Screen {
     }
 
     @Override
-    public boolean mouseScrolled(double x, double y, double scrollX, double scrollY) {
-        return scroll(x, y, scrollY) || super.mouseScrolled(x, y, scrollX, scrollY);
-    }
-
-    @Override
     public boolean keyPressed(KeyEvent event) {
         boolean shift = (event.modifiers() & 1) != 0; // GLFW_MOD_SHIFT
         return key(event.key(), shift) || super.keyPressed(event);
+    }
+    //?} else {
+    /*@Override
+    public boolean mouseClicked(double x, double y, int button) {
+        return super.mouseClicked(x, y, button) || press(x, y, button);
+    }
+
+    @Override
+    public boolean mouseDragged(double x, double y, int button, double dx, double dy) {
+        return drag(x, y, button) || super.mouseDragged(x, y, button, dx, dy);
+    }
+
+    @Override
+    public boolean mouseReleased(double x, double y, int button) {
+        boolean handled = release(x, y, button);
+        return super.mouseReleased(x, y, button) || handled;
+    }
+
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        boolean shift = (modifiers & 1) != 0;
+        return key(keyCode, shift) || super.keyPressed(keyCode, scanCode, modifiers);
+    }
+    *///?}
+
+    @Override
+    public boolean mouseScrolled(double x, double y, double scrollX, double scrollY) {
+        return scroll(x, y, scrollY) || super.mouseScrolled(x, y, scrollX, scrollY);
     }
 
     @Override

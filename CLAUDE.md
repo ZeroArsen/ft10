@@ -26,9 +26,10 @@ decided; add manual steps to `context/TESTING.md`; keep `CHANGELOG.md` current.
 - Stonecutter 0.9.8 + loom-back-compat 0.4.2, Loom 1.18-SNAPSHOT, Gradle 9.8.0, Fabric Loader 0.19.5.
 - Per-node versions (Fabric API, YACL, Mod Menu, `mod.mc_compat`) live in `stonecutter.properties.toml`.
 - JDK 25 builds everything; 1.21.x nodes target Java 21, 26.x nodes Java 25.
-- Nodes: `1.21.11`, `26.2` (`vcsVersion`, the side of every `//? if` that is uncommented in `src/`).
+- Nodes (one jar per protocol family, D22): `1.21.1`, `1.21.3`, `1.21.4`, `1.21.5`, `1.21.8`, `1.21.10`, `1.21.11`,
+  `26.1.2`, `26.2` (`vcsVersion`, the side of every `//? if` that is uncommented in `src/`), `26.3`.
 - Run configs: `:26.2:runClient` (Ft10Dev), `:26.2:runOpponent` (Ft10Rival, own run dir), `:26.2:runServer`
-  (`run/server`); the same tasks on `:1.21.11:` run in `run/1.21.11/`. `-Pft10.join=localhost` joins the dev
+  (`run/server`); the same tasks on any other node (`:1.21.1:`) run in `run/<version>/`. `-Pft10.join=localhost` joins the dev
   server, `-Pft10.debug` starts with `/ft debug` on.
 
 ## Releasing (same flow as rGoldenHeads)

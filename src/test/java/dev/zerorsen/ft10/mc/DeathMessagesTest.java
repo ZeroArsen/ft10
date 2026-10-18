@@ -16,7 +16,7 @@ import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.world.entity.EntityType;
-//? if >=26.1 {
+//? if >=26.2 {
 import net.minecraft.world.entity.EntityTypes;
 //?}
 import org.junit.jupiter.api.BeforeAll;
@@ -202,12 +202,17 @@ class DeathMessagesTest {
     }
 
     private static MutableComponent name(EntityType<?> type, UUID uuid, String name) {
-        return Component.literal(name).withStyle(style -> style.withHoverEvent(
-            new HoverEvent.ShowEntity(new HoverEvent.EntityTooltipInfo(type, uuid, Component.literal(name)))));
+        var info = new HoverEvent.EntityTooltipInfo(type, uuid, Component.literal(name));
+        //? if >=1.21.5 {
+        HoverEvent hover = new HoverEvent.ShowEntity(info);
+        //?} else {
+        /*HoverEvent hover = new HoverEvent(HoverEvent.Action.SHOW_ENTITY, info);
+        *///?}
+        return Component.literal(name).withStyle(style -> style.withHoverEvent(hover));
     }
 
-    // Before 26.x the constants were on EntityType itself. A nested class loads lazily, after the bootstrap.
-    //? if <26.1 {
+    // Before 26.2 the constants were on EntityType itself. A nested class loads lazily, after the bootstrap.
+    //? if <26.2 {
     /*private static final class EntityTypes {
         static final EntityType<?> PLAYER = EntityType.PLAYER;
         static final EntityType<?> ZOMBIE = EntityType.ZOMBIE;

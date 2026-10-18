@@ -61,8 +61,22 @@ lists messages about your fight it didn't understand, with a **[Copy]** button. 
 ten. Paste the message in an [issue](https://github.com/ZeroArsen/ft10/issues) or add it as a custom pattern.
 
 ## Supported versions
-Fabric. Planned range is Minecraft **1.21 – 26.3** (one jar per version range); right now **26.2** and
-**1.21.11** are built, the other versions are being ported. Requires
+Fabric, Minecraft **1.21 – 26.3**. Each jar covers one range; pick the one for your version:
+
+| Jar | Minecraft |
+|---|---|
+| `+1.21.1` | 1.21, 1.21.1 |
+| `+1.21.3` | 1.21.2, 1.21.3 |
+| `+1.21.4` | 1.21.4 |
+| `+1.21.5` | 1.21.5 |
+| `+1.21.8` | 1.21.6 – 1.21.8 |
+| `+1.21.10` | 1.21.9, 1.21.10 |
+| `+1.21.11` | 1.21.11 |
+| `+26.1.2` | 26.1 – 26.1.2 |
+| `+26.2` | 26.2 |
+| `+26.3` | 26.3 |
+
+Requires
 [Fabric API](https://modrinth.com/mod/fabric-api) and [YACL](https://modrinth.com/mod/yacl);
 [Mod Menu](https://modrinth.com/mod/modmenu) is optional.
 

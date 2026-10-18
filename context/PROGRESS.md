@@ -17,18 +17,20 @@
   tests per version; RCON run on 26.2 and 1.21.11 (`TESTING.md`).
 - [x] **4e. Duel servers** (D20, D21): `{winner}` messages, round titles, spectator switch as a death; HUD
   without "vs"; reset-all buttons. Built from a study of the owner's RevoltPvP; 64 unit tests per version.
-- [ ] **5. Multi-version** — **1.21.11 done** (2026-10-17: both jars build, 36 tests pass on each, RCON
-  two-player run in `TESTING.md`; merged into main in 0.2.0). Left: 26.3 and 26.1.2, then 1.21.10 down to
-  1.21.1. Versions per node are already looked up (see below).
+- [x] **5. Multi-version** (D22) — ten jars cover Minecraft 1.21 → 26.3: 1.21.1, 1.21.3, 1.21.4, 1.21.5, 1.21.8,
+  1.21.10, 1.21.11, 26.1.2, 26.2, 26.3. Every node builds and passes the 64 unit tests, compiles against the lowest
+  patch of its range, and passed the RCON two-player run (`TESTING.md`, 2026-10-18). Released in 0.3.0.
 - [x] **6. Release** — GitHub repo (public, CI green); Modrinth project `ft10` (in review). v0.1.0 (26.2)
-  released 2026-10-17; v0.2.0 (26.2 + 1.21.11) adds the 1.21.11 jar and the new detection; v0.2.1 the duel signals.
+  released 2026-10-17; v0.2.0 (26.2 + 1.21.11) adds the 1.21.11 jar and the new detection; v0.2.1 the duel signals;
+  v0.3.0 every version from 1.21 to 26.3.
 
 ## Next task
-The owner tests 0.2.1 on RevoltPvP and public servers with `/ft debug` and reports "Not recognized" messages;
-add the formats as presets. Next port: 26.1.2 (it settles whether each `>=26.1` guard really belongs at 26.1, see ARCHITECTURE.md) and
-26.3, then 1.21.10 down to 1.21.1 (the 1.21.9, 1.21.6 and 1.21.5 boundaries in ARCHITECTURE.md still need guards).
+The owner tests on RevoltPvP and public servers with `/ft debug` and reports "Not recognized" messages; add the
+formats as presets. The HUD editor and the settings buttons still need a click test on an old version (1.21.1).
+A new Minecraft release gets its own node: add it to `settings.gradle.kts` and `stonecutter.properties.toml`
+(look the Fabric API / YACL / Mod Menu versions up on Modrinth), build, fix what breaks in `compat/`.
 
-## Dependency versions per node (Modrinth, 2026-10-17)
+## Dependency versions per node (Modrinth, 2026-10-18)
 | Node | Fabric API | YACL | Mod Menu |
 |---|---|---|---|
 | 1.21.1 | 0.116.17+1.21.1 | 3.8.2+1.21.1-fabric | 11.0.5 |

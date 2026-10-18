@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.0 — 2026-10-18 (beta)
+Now for every Minecraft version from **1.21 to 26.3**.
+
+- New jars: 1.21–1.21.1, 1.21.2–1.21.3, 1.21.4, 1.21.5, 1.21.6–1.21.8, 1.21.9–1.21.10, 26.1–26.1.2 and 26.3, next
+  to 1.21.11 and 26.2. Download the one for your version; features are the same everywhere.
+- On 1.21.5 and older the score is drawn on top of the whole HUD (newer versions draw it right after the action bar).
+
 ## 0.2.1 — 2026-10-18 (beta)
 Kills on duel servers that never really kill the loser.
 

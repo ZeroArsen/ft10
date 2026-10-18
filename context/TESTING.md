@@ -13,11 +13,16 @@
    `damage Ft10Rival 100 minecraft:player_attack by Ft10Dev` kills with a vanilla death message.
 5. Results: `[CHAT]` lines in `run/logs/latest.log` (Ft10Dev) and `run/opponent/logs/latest.log` (Ft10Rival).
 
-## Other versions (1.21.11 so far)
+## Other versions
 - Same steps with the version in the task name: `:1.21.11:runServer`, `:1.21.11:runClient`, `:1.21.11:runOpponent`.
 - Every version except 26.2 runs in `run/<version>/` (client), `run/<version>/opponent/` and
   `run/<version>/server/`, so a 26.2 world is never opened by 1.21.11.
-- 1.21.11 gamerules are snake_case too (`immediate_respawn`; `doImmediateRespawn` is rejected).
+- Gamerules are snake_case from 1.21.11 on (`immediate_respawn`), camelCase before (`doImmediateRespawn`).
+- Use `difficulty=peaceful` in `server.properties` before the first start: a fresh world starts at night and a
+  zombie hit leaves the player in the hurt cooldown, so the next scripted `damage` is rejected ("Target is
+  invulnerable"). Retry a `damage` until the server answers "Applied …".
+- Run `:<version>:downloadAssets` once before starting both clients of a new version: two clients downloading
+  the assets at the same time failed.
 - Screenshots without touching the owner's own windows: post F2 as a window message to the dev client's window
   (`PostMessage` WM_KEYDOWN/WM_KEYUP, scancode 0x3C); the game saves it to `run/<version>/screenshots/`.
 - Chat commands can be typed the same way (T, then WM_CHAR per letter, then Enter). From Git Bash set
@@ -84,6 +89,30 @@ RevoltPvP's round end replayed by hand: hit, `gamemode spectator <loser>`, `tell
 | HUD (screenshot) | ✅ "Ft10Rival" over the score, no "vs" |
 | Reset all scores | ✅ `ScoreStorageTest` (all servers emptied, file saved); the settings button itself is still to click by hand |
 
+## Automated run — 2026-10-18, 0.3.0 every version (RCON, `-Pft10.debug`)
+Each of the ten nodes: Fabric dev server + Ft10Dev + Ft10Rival. Steps: (1) `damage Ft10Rival 100 … by Ft10Dev`
+(vanilla death message), (2) hit Ft10Dev, `gamemode spectator Ft10Dev`, `tellraw @a "Ft10Rival won the round 1 - 1"`,
+(3) hit Ft10Rival, `gamemode spectator Ft10Rival` (no message).
+
+| Node | (1) kill | (2) round end | (3) spectator only | HUD |
+|---|---|---|---|---|
+| 1.21.1 | ✅ | ✅ | ✅ | ✅ screenshot (`HudRenderCallback` + `PoseStack` path) |
+| 1.21.3 | ✅ | ✅ | ✅ | |
+| 1.21.4 | ✅ | ✅ | ✅ | |
+| 1.21.5 | ✅ | ✅ | ✅ | |
+| 1.21.8 | ✅ | ✅ | ✅ | ✅ screenshot |
+| 1.21.10 | ✅ | ✅ | ✅ | |
+| 1.21.11 | ✅ | ✅ | ✅ | |
+| 26.1.2 | ✅ | ✅ | ✅ | |
+| 26.2 | ✅ | ✅ | ✅ | |
+| 26.3 | ✅ | ✅ | ✅ | ✅ screenshot |
+
+Every row: one point per step on both clients, with saved scores carried over from earlier runs. Also: 64 unit
+tests × 10 nodes pass; each node compiles against the lowest patch of its range (1.21, 1.21.2, 1.21.6, 1.21.7,
+1.21.9, 26.1, 26.1.1); the eight mixin targets exist in every jar. The first 1.21.1 attempt "missed" steps 2–3:
+a zombie (night, not yet peaceful) had put Ft10Dev in the hurt cooldown, so the server rejected the scripted hits.
+Not an FT10 issue; the script now starts peaceful and retries hits.
+
 ## Still to check by hand
 - [ ] Kill with a bow; void/fall after a hit ("doomed to fall by").
 - [ ] Third player hits Ft10Dev mid-fight → screen stays; new opponent → 0 - 0; back → old score.
@@ -99,3 +128,5 @@ RevoltPvP's round end replayed by hand: hit, `gamemode spectator <loser>`, `tell
 - [ ] Real fight with sword swings: sidebar kill counter on a fake-death server; `countCombatLogs` on.
 - [ ] RevoltPvP for real (owner): duel rounds and the last round count once each; spectating a duel adds nothing.
 - [ ] Settings → General → "Reset scores on this server" / "Reset all scores": confirm screen, Cancel keeps scores.
+- [ ] On an old version (1.21.1 or 1.21.5): the HUD editor (drag, scroll, arrow keys), the settings screen and its
+  reset buttons, and the hotkeys in Controls (category "FT10"; before 1.21.9 it is a plain string category).

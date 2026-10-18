@@ -1,23 +1,30 @@
 package dev.zerorsen.ft10.compat;
 
 import java.util.function.Consumer;
+//? if >=1.21.6 {
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
+//?} else {
+/*import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
+*///?}
 import net.minecraft.client.Minecraft;
 //? if >=26.1 {
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+//?} else {
+/*import net.minecraft.client.gui.GuiGraphics;
+*///?}
+//? if >=26.2 {
 import net.minecraft.client.gui.Hud;
 //?} else {
 /*import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.GuiGraphics;
 *///?}
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 
 /**
  * Everything the mod touches on the in-game HUD. This is the part of Minecraft that changes most between
- * versions (HUD element registry in 1.21.6, Gui split into Gui + Hud and GuiGraphics renamed to
- * GuiGraphicsExtractor in 26.x), so it all lives here behind a small {@link Canvas}.
+ * versions (HUD element registry in 1.21.6, GuiGraphics renamed to GuiGraphicsExtractor in 26.1, Gui split into
+ * Gui + Hud in 26.2), so it all lives here behind a small {@link Canvas}.
  */
 public final class HudCompat {
     private HudCompat() {}
@@ -48,10 +55,14 @@ public final class HudCompat {
         void outline(int x0, int y0, int x1, int y1, int argb);
     }
 
-    /** Draws {@code renderer} right after the vanilla action bar. */
+    /** Draws {@code renderer} right after the vanilla action bar (before 1.21.6: on top of the whole HUD). */
     public static void register(Identifier id, Consumer<Canvas> renderer) {
+        //? if >=1.21.6 {
         HudElementRegistry.attachElementAfter(VanillaHudElements.OVERLAY_MESSAGE, id,
             (graphics, deltaTracker) -> renderer.accept(canvas(graphics)));
+        //?} else {
+        /*HudRenderCallback.EVENT.register((graphics, deltaTracker) -> renderer.accept(canvas(graphics)));
+        *///?}
     }
 
     public static void title(Component title, Component subtitle, int fadeIn, int stay, int fadeOut) {
@@ -86,15 +97,15 @@ public final class HudCompat {
 
     /** F1 (hide GUI) is on. */
     public static boolean hidden() {
-        //? if >=26.1 {
+        //? if >=26.2 {
         return hud().isHidden();
         //?} else {
         /*return Minecraft.getInstance().options.hideGui;
         *///?}
     }
 
-    /** The title, action bar and chat: on {@code Gui.hud} since 26.x, on {@code Gui} itself before. */
-    //? if >=26.1 {
+    /** The title, action bar and chat: on {@code Gui.hud} since 26.2, on {@code Gui} itself before. */
+    //? if >=26.2 {
     private static Hud hud() {
         return Minecraft.getInstance().gui.hud;
     }
@@ -123,23 +134,31 @@ public final class HudCompat {
             *///?}
         }
 
+        // 1.21.6 made the GUI pose a 2D matrix stack; before it was the 3D PoseStack.
+        //? if >=1.21.6 {
         @Override public void push() { graphics.pose().pushMatrix(); }
         @Override public void translate(float x, float y) { graphics.pose().translate(x, y); }
         @Override public void scale(float factor) { graphics.pose().scale(factor, factor); }
         @Override public void pop() { graphics.pose().popMatrix(); }
+        //?} else {
+        /*@Override public void push() { graphics.pose().pushPose(); }
+        @Override public void translate(float x, float y) { graphics.pose().translate(x, y, 0); }
+        @Override public void scale(float factor) { graphics.pose().scale(factor, factor, 1); }
+        @Override public void pop() { graphics.pose().popPose(); }
+        *///?}
 
         @Override
         public void fill(int x0, int y0, int x1, int y1, int argb) {
             graphics.fill(x0, y0, x1, y1, argb);
         }
 
+        /** Four fills: the outline method was renamed three times (renderOutline, submitOutline, outline). */
         @Override
         public void outline(int x0, int y0, int x1, int y1, int argb) {
-            //? if >=26.1 {
-            graphics.outline(x0, y0, x1 - x0, y1 - y0, argb);
-            //?} else {
-            /*graphics.renderOutline(x0, y0, x1 - x0, y1 - y0, argb);
-            *///?}
+            graphics.fill(x0, y0, x1, y0 + 1, argb);
+            graphics.fill(x0, y1 - 1, x1, y1, argb);
+            graphics.fill(x0, y0 + 1, x0 + 1, y1 - 1, argb);
+            graphics.fill(x1 - 1, y0 + 1, x1, y1 - 1, argb);
         }
     }
 }
