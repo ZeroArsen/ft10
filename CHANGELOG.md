@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.4.0 — 2026-10-18 (beta)
+Player heads and quicker resizing.
+
+- Your head is shown left of your (green) score and your opponent's right of theirs (red), with their real skins.
+  Turn it off under Settings → Display → "Show player heads" or with the new button in the HUD editor.
+- The HUD editor (`/ft hud`) has − and + buttons with the current size between them; the + and − keys and the
+  mouse wheel resize too. Cancel also undoes the size and heads changes.
+
 ## 0.3.0 — 2026-10-18 (beta)
 Now for every Minecraft version from **1.21 to 26.3**.
 

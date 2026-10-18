@@ -69,6 +69,8 @@ turns the branch on.
 | 1.21.9 | authlib 7: `GameProfile` is a record (`id()`, `name()`; `getId()`/`getName()` before) | `ProfileCompat` |
 | 1.21.9 | Mouse/key events became records (`MouseButtonEvent`, `KeyEvent`; `(double, double, int)` / `(int, int, int)` before) | `CompatScreen` |
 | 1.21.9 | `KeyMapping.Category` record (a translation key string before) | `KeyCompat` |
+| 1.21.9 | `PlayerSkin` moved from `client.resources` to `world.entity.player` | `SkinCompat` |
+| 26.1 | `PlayerFaceRenderer.draw` → `PlayerFaceExtractor.extractRenderState` (player heads) | `HudCompat` |
 | – | The outline method was `renderOutline`, `submitOutline` (1.21.9–1.21.10), then `outline` (26.x): drawn with four `fill`s instead | `HudCompat` |
 | 26.3 | `InputConstants.Type.KEYSYM` → `KEYBOARD`: avoided with the `KeyMapping(String, int, category)` constructor | `KeyCompat` |
 | 1.21.11 | `ResourceLocation` → `Identifier` (Stonecutter string replacement) | `stonecutter.gradle.kts` |

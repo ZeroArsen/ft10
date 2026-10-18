@@ -14,10 +14,13 @@
   "ft10.action.hud_hidden": "Score HUD hidden",
 
   "ft10.editor.title": "Edit FT10 HUD",
-  "ft10.editor.help": "Drag to move · Scroll to resize · Arrows nudge (Shift: 10 px) · R resets",
+  "ft10.editor.help": "Drag to move · Scroll or +/− to resize · Arrows nudge (Shift: 10 px) · R resets",
   "ft10.editor.done": "Done",
   "ft10.editor.reset": "Reset",
   "ft10.editor.cancel": "Cancel",
+  "ft10.editor.size": "Size ×%s",
+  "ft10.editor.heads.on": "Heads: On",
+  "ft10.editor.heads.off": "Heads: Off",
 
   "key.category.ft10.main": "FT10",
   "key.ft10.toggle": "Turn FT10 on/off",
@@ -124,6 +127,8 @@
   "ft10.config.hudShowName.desc": "Show the opponent's name above the score.",
   "ft10.config.hudShowGoal": "Show goal",
   "ft10.config.hudShowGoal.desc": "Show FT10 and the set score when a goal is set.",
+  "ft10.config.hudShowHeads": "Show player heads",
+  "ft10.config.hudShowHeads.desc": "Your head left of your score, your opponent's right of theirs.",
   "ft10.config.colorMe": "Your score",
   "ft10.config.colorMe.desc": "Color of your number.",
   "ft10.config.colorThem": "Opponent score",

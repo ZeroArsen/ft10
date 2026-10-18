@@ -113,6 +113,15 @@ tests × 10 nodes pass; each node compiles against the lowest patch of its range
 a zombie (night, not yet peaceful) had put Ft10Dev in the hurt cooldown, so the server rejected the scripted hits.
 Not an FT10 issue; the script now starts peaceful and retries hits.
 
+## Automated run — 2026-10-18, 0.4.0 heads and editor size
+| Check | Result |
+|---|---|
+| Heads beside the score (1.21.1, 1.21.10, 26.3; screenshots) | ✅ our head left of green, the opponent's right of red, both aligned with the score; offline dev clients show default skins (Steve / Alex, matching the models in the world) |
+| Editor on 26.2 and 1.21.1 (`/ft hud` typed by window messages) | ✅ new row `[−] Size ×1.20 [+] [Heads: On]`; `=` ×6 → 1.50, heads grow with the HUD; click Heads → Off (old layout); click − → 1.40; Cancel restores 1.2 and heads on, Esc saves |
+| Editor on 26.3 | ⚠ not opened: 26.3 reads input through SDL, which ignores posted Win32 key messages; check by hand |
+| Old `ft10.json` without `hudShowHeads` | ✅ `ConfigManagerTest`: heads on, other values kept |
+| Build | ✅ 65 unit tests × 10 nodes; lowest patches (1.21, 1.21.2, 1.21.6, 1.21.9, 26.1) compile |
+
 ## Still to check by hand
 - [ ] Kill with a bow; void/fall after a hit ("doomed to fall by").
 - [ ] Third player hits Ft10Dev mid-fight → screen stays; new opponent → 0 - 0; back → old score.
@@ -130,3 +139,5 @@ Not an FT10 issue; the script now starts peaceful and retries hits.
 - [ ] Settings → General → "Reset scores on this server" / "Reset all scores": confirm screen, Cancel keeps scores.
 - [ ] On an old version (1.21.1 or 1.21.5): the HUD editor (drag, scroll, arrow keys), the settings screen and its
   reset buttons, and the hotkeys in Controls (category "FT10"; before 1.21.9 it is a plain string category).
+- [ ] Heads with real skins on a real server (online mode): ours and the opponent's; the opponent's head stays after
+  they quit. HUD editor on 26.3 (+/− keys, buttons, Heads toggle) with the real keyboard and mouse.

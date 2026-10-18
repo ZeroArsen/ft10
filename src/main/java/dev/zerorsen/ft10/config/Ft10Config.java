@@ -26,6 +26,7 @@ public final class Ft10Config {
     public boolean hudShadow = true;
     public boolean hudShowName = true;
     public boolean hudShowGoal = true;
+    public boolean hudShowHeads = true;
     public int colorMe = DEFAULT_COLOR_ME;
     public int colorThem = DEFAULT_COLOR_THEM;
     public int colorSeparator = DEFAULT_COLOR_SEPARATOR;

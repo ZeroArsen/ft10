@@ -103,3 +103,10 @@ patch in it. Patches inside a family share intermediary names and protocol, and 
 the family's lowest patch. Fabric API, YACL and Mod Menu are pinned per node to the newest Modrinth build for that
 family. Where a method only changed names (the GUI outline: `renderOutline` → `submitOutline` → `outline`, the
 key input type `KEYSYM` → `KEYBOARD`) the code uses a call that exists everywhere instead of another guard.
+
+**D23 — Player heads beside the score, on by default.** Our head left of our (green) score, the opponent's right of
+theirs (red), 8 px (one text line) and scaled with the HUD. Skins come only from the client's tab list (nothing is
+downloaded); the last skin seen per player is remembered (64 entries) so a head stays after the opponent quits, and
+the default skin for the UUID is the fallback. Drawn through `HudCompat.Canvas.face` (`PlayerFaceRenderer` before
+26.1, `PlayerFaceExtractor` after; `PlayerSkin` moved packages in 1.21.9). The HUD editor got visible size buttons
+and a heads toggle; keypad +/− are not used because 26.3's SDL key codes have no keypad-minus constant.

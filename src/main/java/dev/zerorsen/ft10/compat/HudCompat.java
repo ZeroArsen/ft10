@@ -1,5 +1,6 @@
 package dev.zerorsen.ft10.compat;
 
+import java.util.UUID;
 import java.util.function.Consumer;
 //? if >=1.21.6 {
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
@@ -10,8 +11,10 @@ import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
 import net.minecraft.client.Minecraft;
 //? if >=26.1 {
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.PlayerFaceExtractor;
 //?} else {
 /*import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.PlayerFaceRenderer;
 *///?}
 //? if >=26.2 {
 import net.minecraft.client.gui.Hud;
@@ -53,6 +56,9 @@ public final class HudCompat {
 
         /** One-pixel rectangle border, ARGB color. */
         void outline(int x0, int y0, int x1, int y1, int argb);
+
+        /** A player's face (with the hat layer), {@code size} px square; {@code uuid} may be null. */
+        void face(UUID uuid, String name, int x, int y, int size);
     }
 
     /** Draws {@code renderer} right after the vanilla action bar (before 1.21.6: on top of the whole HUD). */
@@ -159,6 +165,15 @@ public final class HudCompat {
             graphics.fill(x0, y1 - 1, x1, y1, argb);
             graphics.fill(x0, y0 + 1, x0 + 1, y1 - 1, argb);
             graphics.fill(x1 - 1, y0 + 1, x1, y1 - 1, argb);
+        }
+
+        @Override
+        public void face(UUID uuid, String name, int x, int y, int size) {
+            //? if >=26.1 {
+            PlayerFaceExtractor.extractRenderState(graphics, SkinCompat.skin(uuid, name), x, y, size);
+            //?} else {
+            /*PlayerFaceRenderer.draw(graphics, SkinCompat.skin(uuid, name), x, y, size);
+            *///?}
         }
     }
 }

@@ -9,6 +9,7 @@ picks up where you left off.
 - A title, a chat line and a sound for every kill and death
 - First-to games: `/ft goal 10` plays an FT10 and counts the sets you win
 - Works on vanilla and plugin servers, with nothing to install on the server
+- Your head and your opponent's next to the score (can be turned off)
 - Move and resize the score with `/ft hud`; colors and everything else in the settings
 
 ## Commands

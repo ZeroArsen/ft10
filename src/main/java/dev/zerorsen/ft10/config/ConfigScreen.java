@@ -88,6 +88,7 @@ public final class ConfigScreen {
                     .option(bool("hudShadow", d.hudShadow, () -> c.hudShadow, v -> c.hudShadow = v))
                     .option(bool("hudShowName", d.hudShowName, () -> c.hudShowName, v -> c.hudShowName = v))
                     .option(bool("hudShowGoal", d.hudShowGoal, () -> c.hudShowGoal, v -> c.hudShowGoal = v))
+                    .option(bool("hudShowHeads", d.hudShowHeads, () -> c.hudShowHeads, v -> c.hudShowHeads = v))
                     .build())
                 .group(OptionGroup.createBuilder()
                     .name(text("group.colors"))

@@ -14,10 +14,13 @@
   "ft10.action.hud_hidden": "Skor HUD gizlendi",
 
   "ft10.editor.title": "FT10 HUD Düzenle",
-  "ft10.editor.help": "Taşımak için sürükle · Boyut için tekerlek · Ok tuşları kaydırır (Shift: 10 px) · R sıfırlar",
+  "ft10.editor.help": "Taşımak için sürükle · Boyut için tekerlek veya +/− · Ok tuşları kaydırır (Shift: 10 px) · R sıfırlar",
   "ft10.editor.done": "Tamam",
   "ft10.editor.reset": "Sıfırla",
   "ft10.editor.cancel": "İptal",
+  "ft10.editor.size": "Boyut ×%s",
+  "ft10.editor.heads.on": "Kafalar: Açık",
+  "ft10.editor.heads.off": "Kafalar: Kapalı",
 
   "key.category.ft10.main": "FT10",
   "key.ft10.toggle": "FT10 aç/kapa",
@@ -124,6 +127,8 @@
   "ft10.config.hudShowName.desc": "Skorun üstünde rakibin adını göster.",
   "ft10.config.hudShowGoal": "Hedefi göster",
   "ft10.config.hudShowGoal.desc": "Hedef açıkken FT10 ve set skorunu göster.",
+  "ft10.config.hudShowHeads": "Oyuncu kafalarını göster",
+  "ft10.config.hudShowHeads.desc": "Senin kafan skorunun solunda, rakibinki onun skorunun sağında.",
   "ft10.config.colorMe": "Senin skorun",
   "ft10.config.colorMe.desc": "Senin sayının rengi.",
   "ft10.config.colorThem": "Rakip skoru",

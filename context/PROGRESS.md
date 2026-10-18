@@ -22,11 +22,11 @@
   patch of its range, and passed the RCON two-player run (`TESTING.md`, 2026-10-18). Released in 0.3.0.
 - [x] **6. Release** — GitHub repo (public, CI green); Modrinth project `ft10` (in review). v0.1.0 (26.2)
   released 2026-10-17; v0.2.0 (26.2 + 1.21.11) adds the 1.21.11 jar and the new detection; v0.2.1 the duel signals;
-  v0.3.0 every version from 1.21 to 26.3.
+  v0.3.0 every version from 1.21 to 26.3; v0.4.0 player heads and size buttons in the HUD editor (D23).
 
 ## Next task
 The owner tests on RevoltPvP and public servers with `/ft debug` and reports "Not recognized" messages; add the
-formats as presets. The HUD editor and the settings buttons still need a click test on an old version (1.21.1).
+formats as presets. Real skins in the heads and the HUD editor on 26.3 still need a check by hand (`TESTING.md`).
 A new Minecraft release gets its own node: add it to `settings.gradle.kts` and `stonecutter.properties.toml`
 (look the Fabric API / YACL / Mod Menu versions up on Modrinth), build, fix what breaks in `compat/`.
 
